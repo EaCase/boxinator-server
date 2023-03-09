@@ -16,6 +16,6 @@ public class SettingsController {
     }
 
     @PutMapping("/countries/{id}")
-    public void updateCountry(@PathVariable int id) {
+    public void updateCountry(@PathVariable Long id) {
     }
 }

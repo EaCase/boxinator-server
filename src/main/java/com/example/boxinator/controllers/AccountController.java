@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.*;
 public class AccountController {
 
     @GetMapping("/{id}")
-    public void getAccount(@PathVariable int id) {
+    public void getAccount(@PathVariable Long id) {
     }
 
     @PutMapping("/{id}")
-    public void updateAccount(@PathVariable int id) {
+    public void updateAccount(@PathVariable Long id) {
     }
 
     @PostMapping("/")
@@ -19,7 +19,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAccount(@PathVariable int id) {
+    public void deleteAccount(@PathVariable Long id) {
         // TODO Admin only
     }
 }

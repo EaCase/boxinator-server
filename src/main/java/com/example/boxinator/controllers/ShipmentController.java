@@ -40,7 +40,7 @@ public class ShipmentController {
     }
 
     @GetMapping("/{id}")
-    public void getShipmentById(@PathVariable int id) {
+    public void getShipmentById(@PathVariable Long id) {
         /*
         Retrieve the details of a single shipment, remember to consider if the current user has
         access the requested shipment. (Users can only view their own shipment)
@@ -48,12 +48,12 @@ public class ShipmentController {
     }
 
     @GetMapping("/customer/{customerId}")
-    public void getAllCustomerShipments(@PathVariable int customerId) {
+    public void getAllCustomerShipments(@PathVariable Long customerId) {
         // Non admin users only get their own shipments
     }
 
     @PutMapping("/{id}")
-    public void updateShipmentStatus(@PathVariable int id) {
+    public void updateShipmentStatus(@PathVariable Long id) {
         /*
         This endpoint is used to update a shipment, but any non-Administrator users may
         only cancel a shipment. Meaning, only admins can change shipment statuses aside from
@@ -64,8 +64,8 @@ public class ShipmentController {
          */
     }
 
-    @DeleteMapping
-    public void deleteShipping() {
+    @DeleteMapping("/{id}")
+    public void deleteShipping(@PathVariable Long id) {
         // TODO Admin only
     }
 
