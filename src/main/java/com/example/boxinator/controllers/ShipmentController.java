@@ -1,4 +1,4 @@
-package com.example.boxinator.controller;
+package com.example.boxinator.controllers;
 
 import org.springframework.web.bind.annotation.*;
 
