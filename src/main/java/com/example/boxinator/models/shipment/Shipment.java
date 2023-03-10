@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Date;
 import java.util.List;
 
 /**
@@ -34,6 +33,9 @@ public class Shipment {
 
     @Column(nullable = false)
     private Float cost;
+
+    @Column(nullable = false)
+    private String recipient;
 
     @ManyToOne
     @JoinColumn(name = "country_id")

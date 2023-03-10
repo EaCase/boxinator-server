@@ -29,10 +29,11 @@ public class Account {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     private Date createdAt;
 
     @Enumerated(EnumType.ORDINAL)
+    @Column(name = "account_type", nullable = false)
     private AccountType type;
 
     private Date dob;
