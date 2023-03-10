@@ -5,6 +5,8 @@ import com.example.boxinator.dtos.country.CountryGetDto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ShipmentGetDto {
     private Long id;
@@ -14,4 +16,5 @@ public class ShipmentGetDto {
     private String recipient;
     private CountryGetDto country;
     private Float cost;
+    private List<ShipmentStatusGetDto> statuses;
 }
