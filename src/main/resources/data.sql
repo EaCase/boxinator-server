@@ -21,8 +21,8 @@ INSERT INTO account(provider_id, email, created_at, account_type, dob, first_nam
 VALUES ('12345qwerty', 'testmail@gmail.com', null, 2, null, 'Admin', 'Adminton', 1, null, '+3582211445');
 
 
-INSERT INTO shipment(account_id, box_tier_id, box_color, country_id, cost)
-VALUES (1, 1, '#FFFFFF', 1, 100);
+INSERT INTO shipment(account_id, box_tier_id, box_color, country_id, cost, recipient)
+VALUES (1, 1, '#FFFFFF', 1, 100, 'User name');
 
 INSERT INTO shipment_status(shipment_id, status, ts)
 VALUES (1, 1, null);

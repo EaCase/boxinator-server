@@ -25,6 +25,11 @@ public class ShipmentController {
     public void getCompletedShipments() {
     }
 
+    @GetMapping("/cost")
+    public void calculateShipmentCost() {
+        // Takes countryId + boxId?
+    }
+
     @GetMapping("/cancelled")
     public void getCancelledShipments() {
     }
