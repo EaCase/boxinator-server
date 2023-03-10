@@ -2,6 +2,7 @@ package com.example.boxinator.controllers;
 
 import com.example.boxinator.dtos.fee.FeeGetDto;
 import com.example.boxinator.dtos.shipment.ShipmentGetDto;
+import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.models.shipment.Status;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
@@ -94,7 +95,7 @@ public class ShipmentController {
                     schema = @Schema(implementation = ShipmentGetDto.class)
             )}
     )
-    public ResponseEntity<ShipmentGetDto> createShipment() {
+    public ResponseEntity<ShipmentGetDto> createShipment(@RequestBody ShipmentPostDto body) {
         /*
         Used to create a new shipment, the client data must be retrieved based on the authorization
          transmitted in the request header.
