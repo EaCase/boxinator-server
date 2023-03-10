@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 /**
  * Contains information related to a Country, e.g. the shipping multiplier used for calculating the costs
  * of an order.

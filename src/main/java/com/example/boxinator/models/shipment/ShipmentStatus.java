@@ -25,6 +25,6 @@ public class ShipmentStatus {
     @Column(nullable = false)
     private Status status;
 
-    @Column(nullable = false)
+    @Column
     private Date ts;
 }
