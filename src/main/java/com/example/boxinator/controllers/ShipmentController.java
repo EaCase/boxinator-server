@@ -1,11 +1,20 @@
 package com.example.boxinator.controllers;
 
 import com.example.boxinator.dtos.fee.FeeGetDto;
+import com.example.boxinator.dtos.fee.FeeMapper;
 import com.example.boxinator.dtos.shipment.ShipmentGetDto;
+import com.example.boxinator.dtos.shipment.ShipmentPostDto;
+import com.example.boxinator.errors.exceptions.ApplicationException;
+import com.example.boxinator.models.shipment.Shipment;
 import com.example.boxinator.models.shipment.Status;
+import com.example.boxinator.repositories.shipment.ShipmentRepository;
+import com.example.boxinator.services.shipment.ShipmentService;
+import com.example.boxinator.services.shipment.ShipmentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +24,14 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "shipments")
 public class ShipmentController {
+    private final ShipmentService shipmentService;
+    private final FeeMapper feeMapper;
+
+    public ShipmentController(ShipmentServiceImpl service, FeeMapper feeMapper) {
+        this.shipmentService = service;
+        this.feeMapper = feeMapper;
+    }
+
 
     @GetMapping("/")
     @Operation(summary = "Get all the shipments relevant to the authenticated user. Filterable by status type, or using a date range (from-to).")
@@ -49,11 +66,14 @@ public class ShipmentController {
     @ApiResponse(
             responseCode = "200",
             description = "Returns a list of the shipments with the completed status.",
-            content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = ShipmentGetDto.class))
-            )}
+            content = {
+                    @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ShipmentGetDto.class))
+                    )}
     )
     public ResponseEntity<List<ShipmentGetDto>> getCompletedShipments() {
+//        List<Shipment> shipmentCompleted = shipmentService.getByStatus(1L, Status.COMPLETED);
+//        return ResponseEntity.ok().body(shipmentCompleted);
         throw new RuntimeException("Not implemented.");
     }
 
@@ -62,9 +82,10 @@ public class ShipmentController {
     @ApiResponse(
             responseCode = "200",
             description = "Returns a list of the shipments with the cancelled status.",
-            content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = ShipmentGetDto.class))
-            )}
+            content = {
+                    @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ShipmentGetDto.class))
+                    )}
     )
     public ResponseEntity<List<ShipmentGetDto>> getCancelledShipments() {
         throw new RuntimeException("Not implemented.");
@@ -80,8 +101,7 @@ public class ShipmentController {
             )}
     )
     public ResponseEntity<FeeGetDto> calculateShipmentCost(@RequestParam Long countryId, @RequestParam Long boxTierId) {
-        // Takes countryId + boxId?
-        throw new RuntimeException("Not implemented.");
+        return ResponseEntity.ok().body(feeMapper.toFeeDto(shipmentService.calculateShipmentCost(countryId, boxTierId)));
     }
 
 
@@ -94,7 +114,7 @@ public class ShipmentController {
                     schema = @Schema(implementation = ShipmentGetDto.class)
             )}
     )
-    public ResponseEntity<ShipmentGetDto> createShipment() {
+    public ResponseEntity<ShipmentGetDto> createShipment(@RequestBody ShipmentPostDto body) {
         /*
         Used to create a new shipment, the client data must be retrieved based on the authorization
          transmitted in the request header.

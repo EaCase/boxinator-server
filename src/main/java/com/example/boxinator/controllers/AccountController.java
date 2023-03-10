@@ -43,11 +43,11 @@ public class AccountController {
     }
 
     @PostMapping("/")
-    @Operation(summary = "Creat an account")
+    @Operation(summary = "Create an account")
     @ApiResponse(responseCode = "201",
             description = "Account created successfully",
-            content =  { @Content(mediaType = "application/json",
-                     schema = @Schema(implementation = AccountGetDto.class)
+            content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = AccountGetDto.class)
             )}
     )
     public ResponseEntity<AccountGetDto> createAccount() {
@@ -59,7 +59,7 @@ public class AccountController {
     @Operation(summary = "Delete an account")
     @ApiResponse(responseCode = "200",
             description = "Account deleted successfully",
-            content = { @Content(mediaType = "application/json",
+            content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = Long.class)
             )}
     )

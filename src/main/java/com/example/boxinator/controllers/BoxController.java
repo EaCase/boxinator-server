@@ -1,8 +1,8 @@
 package com.example.boxinator.controllers;
 
 import com.example.boxinator.dtos.box.BoxTierGetDto;
-import com.example.boxinator.dtos.country.CountryGetDto;
-import com.example.boxinator.models.box.BoxTier;
+import com.example.boxinator.dtos.box.BoxTierMapper;
+import com.example.boxinator.services.box.BoxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,6 +18,13 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "boxes")
 public class BoxController {
+    private final BoxService boxService;
+    private final BoxTierMapper boxTierMapper;
+
+    public BoxController(BoxService boxService, BoxTierMapper boxTierMapper) {
+        this.boxService = boxService;
+        this.boxTierMapper = boxTierMapper;
+    }
 
     @GetMapping("/tiers")
     @Operation(summary = "Get all the available box tiers which can be used in shipments.")
@@ -29,6 +36,7 @@ public class BoxController {
             )}
     )
     public ResponseEntity<List<BoxTierGetDto>> getBoxTiers() {
-        throw new RuntimeException("Not implemented.");
+        var result = boxService.getAllBoxTiers();
+        return ResponseEntity.ok().body(result.stream().map(boxTierMapper::toDto).toList());
     }
 }
