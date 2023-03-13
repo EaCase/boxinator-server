@@ -1,7 +1,10 @@
 package com.example.boxinator.controllers;
 
 import com.example.boxinator.dtos.country.CountryGetDto;
+import com.example.boxinator.dtos.country.CountryMapper;
 import com.example.boxinator.dtos.country.CountryPostDto;
+import com.example.boxinator.services.country.CountryService;
+import com.example.boxinator.services.country.CountryServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,6 +20,13 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "settings")
 public class SettingsController {
+    private final CountryService countryService;
+    private final CountryMapper countryMapper;
+
+    public SettingsController(CountryServiceImpl countryService, CountryMapper countryMapper) {
+        this.countryService = countryService;
+        this.countryMapper = countryMapper;
+    }
 
     @GetMapping("/countries")
     @Operation(summary = "Get all the countries.")
@@ -28,7 +38,8 @@ public class SettingsController {
             )}
     )
     public ResponseEntity<List<CountryGetDto>> getCountries() {
-        throw new RuntimeException("Not implemented.");
+        var countries = countryService.getAll().stream().map(countryMapper::toGetDto).toList();
+        return ResponseEntity.ok().body(countries);
     }
 
     @PostMapping("/countries")
@@ -41,7 +52,8 @@ public class SettingsController {
             )}
     )
     public ResponseEntity<CountryGetDto> addCountry(@RequestBody CountryPostDto body) {
-        throw new RuntimeException("Not implemented.");
+        var createdCountry = countryMapper.toGetDto(countryService.create(body));
+        return ResponseEntity.ok().body(createdCountry);
     }
 
     @PutMapping("/countries/{id}")
@@ -54,6 +66,7 @@ public class SettingsController {
             )}
     )
     public ResponseEntity<CountryGetDto> updateCountry(@PathVariable Long id, @RequestBody CountryPostDto body) {
-        throw new RuntimeException("Not implemented.");
+        var editedCountry = countryMapper.toGetDto(countryService.update(id, body));
+        return ResponseEntity.ok().body(editedCountry);
     }
 }

@@ -29,7 +29,6 @@ public class AccountController {
     )
     public ResponseEntity<List<AccountGetDto>> getAccount(@PathVariable Long id) {
         throw new RuntimeException("Not implemented.");
-
     }
 
     @PutMapping("/{id}")

@@ -3,21 +3,18 @@ package com.example.boxinator.controllers;
 import com.example.boxinator.dtos.fee.FeeGetDto;
 import com.example.boxinator.dtos.fee.FeeMapper;
 import com.example.boxinator.dtos.shipment.ShipmentGetDto;
+import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
-import com.example.boxinator.errors.exceptions.ApplicationException;
 import com.example.boxinator.models.shipment.Shipment;
-import com.example.boxinator.models.shipment.Status;
-import com.example.boxinator.repositories.shipment.ShipmentRepository;
 import com.example.boxinator.services.shipment.ShipmentService;
 import com.example.boxinator.services.shipment.ShipmentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 
@@ -27,9 +24,12 @@ public class ShipmentController {
     private final ShipmentService shipmentService;
     private final FeeMapper feeMapper;
 
-    public ShipmentController(ShipmentServiceImpl service, FeeMapper feeMapper) {
+    private final ShipmentMapper shipmentMapper;
+
+    public ShipmentController(ShipmentServiceImpl service, FeeMapper feeMapper, ShipmentMapper shipmentMapper) {
         this.shipmentService = service;
         this.feeMapper = feeMapper;
+        this.shipmentMapper = shipmentMapper;
     }
 
 
@@ -108,7 +108,7 @@ public class ShipmentController {
     @PostMapping("/")
     @Operation(summary = "Create a new shipment with the provided values.")
     @ApiResponse(
-            responseCode = "200",
+            responseCode = "201",
             description = "Returns the created shipment.",
             content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = ShipmentGetDto.class)
@@ -120,8 +120,12 @@ public class ShipmentController {
          transmitted in the request header.
 
         Administrators can also create shipments.
+
          */
-        throw new RuntimeException("Not implemented.");
+
+        Shipment shipment = shipmentService.createNewShipment(1L, body);
+        URI location = URI.create("shipments/" + shipment.getId());
+        return ResponseEntity.created(location).body(shipmentMapper.toShipmentDto(shipment));
     }
 
     @GetMapping("/{id}")
@@ -134,11 +138,14 @@ public class ShipmentController {
             )}
     )
     public ResponseEntity<ShipmentGetDto> getShipmentById(@PathVariable Long id) {
+
+
+        return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipmentService.getById(id)));
         /*
         Retrieve the details of a single shipment, remember to consider if the current user has
         access the requested shipment. (Users can only view their own shipment)
      */
-        throw new RuntimeException("Not implemented.");
+
     }
 
     @GetMapping("/customer/{customerId}")
