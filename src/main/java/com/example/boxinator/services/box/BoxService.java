@@ -8,4 +8,5 @@ import java.util.List;
 @Service
 public interface BoxService {
     List<BoxTier> getAllBoxTiers();
+    BoxTier getById(Long id);
 }

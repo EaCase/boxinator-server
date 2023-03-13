@@ -6,4 +6,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface FeeService {
     Fee getBaseShipmentFee();
+    Fee calculateShipmentCost(Long countryId, Long boxTierId);
 }

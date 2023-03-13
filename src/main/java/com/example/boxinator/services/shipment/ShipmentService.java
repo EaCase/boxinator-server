@@ -18,4 +18,9 @@ public interface ShipmentService extends CrudService<Shipment, ShipmentPostDto> 
     List<Shipment> getByStatus(Long accountId, Status status);
 
     Fee calculateShipmentCost(Long countryId, Long boxTierId);
+
+    Shipment createNewShipment(Long accountId, ShipmentPostDto dto);
+
+
+
 }

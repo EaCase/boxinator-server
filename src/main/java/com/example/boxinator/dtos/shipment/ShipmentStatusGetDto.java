@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class ShipmentStatusGetDto {
     private Status status;
-    private String timestamp;
+    private String ts;
 }
