@@ -6,6 +6,8 @@ import com.example.boxinator.dtos.shipment.ShipmentGetDto;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.models.shipment.Shipment;
+import com.example.boxinator.models.shipment.Status;
+import com.example.boxinator.repositories.shipment.ShipmentRepository;
 import com.example.boxinator.services.shipment.ShipmentService;
 import com.example.boxinator.services.shipment.ShipmentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -26,10 +29,13 @@ public class ShipmentController {
 
     private final ShipmentMapper shipmentMapper;
 
-    public ShipmentController(ShipmentServiceImpl service, FeeMapper feeMapper, ShipmentMapper shipmentMapper) {
+    private final ShipmentRepository shipmentRepository;
+
+    public ShipmentController(ShipmentServiceImpl service, FeeMapper feeMapper, ShipmentMapper shipmentMapper, ShipmentRepository shipmentRepository) {
         this.shipmentService = service;
         this.feeMapper = feeMapper;
         this.shipmentMapper = shipmentMapper;
+        this.shipmentRepository = shipmentRepository;
     }
 
 
@@ -47,6 +53,9 @@ public class ShipmentController {
             @RequestParam(required = false) String to,
             @RequestParam(required = false) String status
     ) {
+
+        List<ShipmentGetDto> shipments = shipmentService.getAll().stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
+        return ResponseEntity.ok().body(shipments);
         /*
         Retrieve a list of shipments relevant to the authenticated user.
         A user will see only their shipments.
@@ -58,7 +67,6 @@ public class ShipmentController {
 
         This could be done using query strings to provide these filters
          */
-        throw new RuntimeException("Not implemented.");
     }
 
     @GetMapping("/complete")
@@ -71,9 +79,13 @@ public class ShipmentController {
                             array = @ArraySchema(schema = @Schema(implementation = ShipmentGetDto.class))
                     )}
     )
-    public ResponseEntity<List<ShipmentGetDto>> getCompletedShipments() {
-//        List<Shipment> shipmentCompleted = shipmentService.getByStatus(1L, Status.COMPLETED);
-//        return ResponseEntity.ok().body(shipmentCompleted);
+    public ResponseEntity<List<Shipment>> getCompletedShipments(Long id) {
+
+        List<Shipment> shipments = shipmentService.getByStatus(id, Status.COMPLETED);
+
+       // List<ShipmentGetDto> shipmentDTOS = shipments.stream().map(ShipmentGetDto::new).collect(Collectors.toList());
+
+
         throw new RuntimeException("Not implemented.");
     }
 
@@ -122,7 +134,6 @@ public class ShipmentController {
         Administrators can also create shipments.
 
          */
-
         Shipment shipment = shipmentService.createNewShipment(1L, body);
         URI location = URI.create("shipments/" + shipment.getId());
         return ResponseEntity.created(location).body(shipmentMapper.toShipmentDto(shipment));
@@ -159,7 +170,9 @@ public class ShipmentController {
     )
     public ResponseEntity<List<ShipmentGetDto>> getAllCustomerShipments(@PathVariable Long customerId) {
         // Non admin users only get their own shipments
-        throw new RuntimeException("Not implemented.");
+        List<ShipmentGetDto> shipments = shipmentService.getAccountShipments(customerId).stream().map(shipmentMapper::toShipmentDto).toList();
+        return ResponseEntity.ok().body(shipments);
+       // throw new RuntimeException("Not implemented.");
     }
 
     @PutMapping("/{id}")
@@ -171,7 +184,7 @@ public class ShipmentController {
                     schema = @Schema(implementation = ShipmentGetDto.class)
             )}
     )
-    public ResponseEntity<ShipmentGetDto> updateShipmentStatus(@PathVariable Long id, @RequestParam String status) {
+    public ResponseEntity<ShipmentGetDto> updateShipmentStatus(@PathVariable Long id, @RequestBody String status) {
         /*
         This endpoint is used to update a shipment, but any non-Administrator users may
         only cancel a shipment. Meaning, only admins can change shipment statuses aside from
@@ -180,7 +193,11 @@ public class ShipmentController {
         An administrator can make any changes they wish to a shipment. The administrator
         will use this to mark a shipment as completed.
          */
-        throw new RuntimeException("Not implemented.");
+        Status statusEnum = Status.fromString(status);
+
+        var shipment = shipmentService.updateShipmentStatus(id, statusEnum);
+
+        return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipment));
     }
 
     @DeleteMapping("/{id}")
@@ -193,6 +210,9 @@ public class ShipmentController {
     )
     public ResponseEntity<Long> deleteShipping(@PathVariable Long id) {
         // TODO Admin only
-        throw new RuntimeException("Not implemented.");
+
+        shipmentService.deleteById(id);
+        return ResponseEntity.ok().body(id);
+
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
 
 @Service
 public interface ShipmentService extends CrudService<Shipment, ShipmentPostDto> {
-    List<Account> getAccountShipments(Long id);
+    List<Shipment> getAccountShipments(Long id);
 
     List<Shipment> getByStatus(Long accountId, Status status);
 
@@ -21,6 +21,5 @@ public interface ShipmentService extends CrudService<Shipment, ShipmentPostDto> 
 
     Shipment createNewShipment(Long accountId, ShipmentPostDto dto);
 
-
-
+    Shipment updateShipmentStatus(Long id, Status status);
 }

@@ -59,6 +59,13 @@ public class CountryServiceImpl implements CountryService {
     }
 
     @Override
+    public void deleteById(Long id) {
+
+        countryRepository.findById(id).orElseThrow(() -> new ApplicationException("Country wit this id does not exist", HttpStatus.NOT_FOUND));
+        countryRepository.deleteById(id);
+    }
+
+    @Override
     public Country update(Long id, CountryPostDto dto) {
         Country country = countryRepository.findById(id).orElseThrow(() -> new ApplicationException(
                 "A country with the id: " + id +  " Could not be found.",
@@ -71,11 +78,17 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public Country getById(Long id) {
-        throw new RuntimeException("Not implemented");
+
+        return countryRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException("No country found with that id", HttpStatus.NOT_FOUND));
+
     }
 
+
     @Override
-    public Long deleteById(Long id) {
-        throw new RuntimeException("Not implemented");
+    public void delete(Long id) {
+        countryRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException("Country wit this id does not exist", HttpStatus.NOT_FOUND));
+        countryRepository.deleteById(id);
     }
 }

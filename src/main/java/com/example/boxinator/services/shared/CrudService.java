@@ -9,7 +9,7 @@ public interface CrudService<T, U> {
 
     List<T> getAll();
 
-    Long deleteById(Long id);
+    void deleteById(Long id);
 
     T update(Long id, U dto);
 }

@@ -69,4 +69,15 @@ public class SettingsController {
         var editedCountry = countryMapper.toGetDto(countryService.update(id, body));
         return ResponseEntity.ok().body(editedCountry);
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a country")
+    @ApiResponse(responseCode = "200",
+        description = "Succesfully deleted a country",
+        content = {@Content(mediaType = "application/json",
+            schema = @Schema(implementation = Long.class))})
+    public ResponseEntity<Long> delete(@PathVariable long id){
+        countryService.deleteById(id);
+        return ResponseEntity.ok().body(id);
+    }
 }

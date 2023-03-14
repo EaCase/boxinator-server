@@ -41,6 +41,6 @@ public class Shipment {
     @JoinColumn(name = "country_id")
     private Country country;
 
-    @OneToMany(mappedBy = "shipment")
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.REMOVE)
     private List<ShipmentStatus> statuses;
 }
