@@ -1,15 +1,23 @@
 package com.example.boxinator.controllers;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.boxinator.auth.client.AuthClient;
+import com.example.boxinator.dtos.auth.Credentials;
+import com.example.boxinator.dtos.auth.AuthResponse;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "auth")
 public class AuthController {
 
-    @PostMapping
-    public void login() {
+    private final AuthClient authClient;
+
+    public AuthController(AuthClient authClient) {
+        this.authClient = authClient;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody Credentials credentials) {
         /*
         Authenticates a user. Accepts appropriate parameters in the request body as application/json.
         This should also return their account type (customer, or administrator – See Appendix A).
@@ -22,5 +30,11 @@ public class AuthController {
         should be temporarily ignored. Candidates should decide on an appropriate threshold
         for rate limiting.
      */
+        return authClient.login(credentials);
+    }
+
+    @PostMapping("/register")
+    public void register() {
+
     }
 }
