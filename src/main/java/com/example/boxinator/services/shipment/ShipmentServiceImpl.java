@@ -3,6 +3,7 @@ package com.example.boxinator.services.shipment;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.errors.exceptions.ApplicationException;
+import com.example.boxinator.models.country.Country;
 import com.example.boxinator.models.fee.Fee;
 import com.example.boxinator.models.shipment.Shipment;
 import com.example.boxinator.models.shipment.ShipmentStatus;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class ShipmentServiceImpl implements ShipmentService {
@@ -119,10 +122,8 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public void deleteById(Long id) {
 
-        // WIP
-        // TODO CAN NOT DELETE SHIPMENT BECAUSE OF CONSTRAINT IN SHIPMENT_STATUS
+
         // TODO Admin only
-        // TODO could not execute statement; SQL [n/a]; constraint [fk8a7kseeww1qq6e6afno34odmk]
 
         shipmentRepo.findById(id)
                 .orElseThrow(() -> new ApplicationException("Shipment with this id does not exist.", HttpStatus.NOT_FOUND));
@@ -148,24 +149,23 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public Shipment update(Long id, ShipmentPostDto dto) {
 
-        // WIP
+       Optional <Shipment> optionalShipment = shipmentRepo.findById(id);
         // TODO Figure out how to update Shipment correctly
 
-        if(shipmentRepo.findById(id).isEmpty()) {
+        if(optionalShipment.isEmpty()) {
             throw new ApplicationException("Could not update shipment with that id", HttpStatus.NOT_FOUND);
         }
-        Shipment s = shipmentMapper.toShipment(dto);
-        s.setId(id);
-        s.setCost(Float.valueOf(s.getCost()));
-        s.setBoxColor(dto.getBoxColor());
-        s.setRecipient(dto.getRecipient());
+        Shipment shipment = optionalShipment.get();
+        shipment.setRecipient(dto.getRecipient());
+        shipment.setBoxColor(dto.getBoxColor());
+        
 
-
-        getById(s.getId());
-        return shipmentRepo.save(s);
+        return shipmentRepo.save(shipment);
         //s.setStatuses();
         //s.setCountry();
-
+       // s.setCost(Float.valueOf(s.getCost()));
+        // s.setBoxColor(dto.getBoxColor());
+        //   s.setRecipient(dto.getRecipient());
 
     }
 }

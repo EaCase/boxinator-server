@@ -203,6 +203,33 @@ public class ShipmentController {
         return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipment));
     }
 
+
+    @PutMapping("/update/{id}")
+    @Operation(summary = "Update an entire shipment.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Returns the updated shipment.",
+            content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ShipmentGetDto.class)
+            )}
+    )
+    public ResponseEntity<ShipmentGetDto> updateShipment(@PathVariable Long id, @RequestBody ShipmentPostDto shipmentPost) {
+
+     //   ShipmentPostDto postDto = shipmentMapper.toShipment(shipmentPost);
+
+     //   Shipment updateShipment = shipmentService.update(id, postDto);
+
+     //   ShipmentGetDto getDto = shipmentMapper.toShipmentDto(updateShipment);
+
+        return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipmentService.update(id, shipmentPost)));
+
+       // return ResponseEntity.ok(getDto);
+
+       // throw new RuntimeException("Not implemented.");
+
+    }
+
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a shipment by id (Admin only).")
     @ApiResponse(responseCode = "200",
