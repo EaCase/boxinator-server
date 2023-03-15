@@ -6,6 +6,7 @@ import com.example.boxinator.dtos.shipment.ShipmentGetDto;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.models.shipment.Shipment;
+import com.example.boxinator.models.shipment.ShipmentStatus;
 import com.example.boxinator.models.shipment.Status;
 import com.example.boxinator.repositories.shipment.ShipmentRepository;
 import com.example.boxinator.services.shipment.ShipmentService;
@@ -79,14 +80,11 @@ public class ShipmentController {
                             array = @ArraySchema(schema = @Schema(implementation = ShipmentGetDto.class))
                     )}
     )
-    public ResponseEntity<List<Shipment>> getCompletedShipments(Long id) {
+    public ResponseEntity<List<ShipmentGetDto>> getCompletedShipments() {
+        List<Shipment> shipments = shipmentService.getByStatus(1L, Status.COMPLETED);
+        List<ShipmentGetDto> shipmentDtos = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
 
-        List<Shipment> shipments = shipmentService.getByStatus(id, Status.COMPLETED);
-
-       // List<ShipmentGetDto> shipmentDTOS = shipments.stream().map(ShipmentGetDto::new).collect(Collectors.toList());
-
-
-        throw new RuntimeException("Not implemented.");
+        return ResponseEntity.ok().body(shipmentDtos);
     }
 
     @GetMapping("/cancelled")
@@ -100,7 +98,13 @@ public class ShipmentController {
                     )}
     )
     public ResponseEntity<List<ShipmentGetDto>> getCancelledShipments() {
-        throw new RuntimeException("Not implemented.");
+
+        List<Shipment> shipments = shipmentService.getByStatus(1L, Status.CANCELLED);
+        List<ShipmentGetDto> shipmentDtos = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
+        return ResponseEntity.ok().body(shipmentDtos);
+
+       //throw new RuntimeException("Not implemented.");
+
     }
 
     @GetMapping("/cost")
@@ -172,7 +176,6 @@ public class ShipmentController {
         // Non admin users only get their own shipments
         List<ShipmentGetDto> shipments = shipmentService.getAccountShipments(customerId).stream().map(shipmentMapper::toShipmentDto).toList();
         return ResponseEntity.ok().body(shipments);
-       // throw new RuntimeException("Not implemented.");
     }
 
     @PutMapping("/{id}")

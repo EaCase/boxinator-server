@@ -18,6 +18,7 @@ import java.util.List;
 public class Shipment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shipment_id")
     private Long id;
 
     @ManyToOne(optional = false)
@@ -28,7 +29,7 @@ public class Shipment {
     @JoinColumn(name = "box_tier_id")
     private BoxTier boxTier;
 
-    @Column(nullable = false, length = 10)
+    @Column(name="box_color", nullable = false, length = 10)
     private String boxColor;
 
     @Column(nullable = false)

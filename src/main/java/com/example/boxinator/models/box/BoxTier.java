@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class BoxTier {
     @Id
+    @Column(name = "box_tier_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

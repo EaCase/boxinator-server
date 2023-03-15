@@ -3,7 +3,6 @@ package com.example.boxinator.services.shipment;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.errors.exceptions.ApplicationException;
-import com.example.boxinator.models.account.Account;
 import com.example.boxinator.models.fee.Fee;
 import com.example.boxinator.models.shipment.Shipment;
 import com.example.boxinator.models.shipment.ShipmentStatus;
@@ -61,8 +60,6 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public List<Shipment> getAccountShipments(Long id) {
 
-        // WIP
-        // DOESNT RETURN CORRECT DATA
         // ACCOUNTREPOSITORY HAS NATIVE QUERY
 
         return shipmentRepo.findAllByAccountId(id);
@@ -70,10 +67,12 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     public List<Shipment> getByStatus(Long accountId, Status status) {
-        // WIP
-        // DOESNT GET STATUS
-        return shipmentRepo.getShipmentByAccountIdAndStatuses(accountId, status);
+        var res = shipmentRepo.getShipmentsByStatus(accountId, status.ordinal());
+        System.out.println(res);
+        System.out.println(res.size());
+        return res;
     }
+
 
     @Override
     public Fee calculateShipmentCost(Long countryId, Long boxTierId) {
