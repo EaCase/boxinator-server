@@ -1,6 +1,7 @@
 package com.example.boxinator.controllers;
 
 import com.example.boxinator.auth.client.AuthClient;
+import com.example.boxinator.dtos.auth.AuthRefresh;
 import com.example.boxinator.dtos.auth.Credentials;
 import com.example.boxinator.dtos.auth.AuthResponse;
 import org.springframework.http.*;
@@ -30,11 +31,19 @@ public class AuthController {
         should be temporarily ignored. Candidates should decide on an appropriate threshold
         for rate limiting.
      */
-        return authClient.login(credentials);
+        var result = authClient.login(credentials);
+        return ResponseEntity.ok().body(result);
     }
 
     @PostMapping("/register")
-    public void register() {
+    public ResponseEntity<String> register(@RequestBody Credentials credentials) {
+        var result = authClient.register(credentials);
+        return ResponseEntity.ok().body(result);
+    }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@RequestBody AuthRefresh body) {
+        var result = authClient.refresh(body.getRefreshToken());
+        return ResponseEntity.ok().body(result);
     }
 }

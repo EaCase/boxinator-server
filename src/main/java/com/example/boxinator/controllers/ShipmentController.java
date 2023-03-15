@@ -6,6 +6,7 @@ import com.example.boxinator.dtos.shipment.ShipmentGetDto;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.models.shipment.Shipment;
+import com.example.boxinator.models.shipment.Status;
 import com.example.boxinator.services.shipment.ShipmentService;
 import com.example.boxinator.services.shipment.ShipmentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -72,9 +74,8 @@ public class ShipmentController {
                     )}
     )
     public ResponseEntity<List<ShipmentGetDto>> getCompletedShipments() {
-//        List<Shipment> shipmentCompleted = shipmentService.getByStatus(1L, Status.COMPLETED);
-//        return ResponseEntity.ok().body(shipmentCompleted);
-        throw new RuntimeException("Not implemented.");
+        List<Shipment> shipmentCompleted = shipmentService.getByStatus(1L, Status.COMPLETED);
+        return ResponseEntity.ok().body(shipmentCompleted.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList()));
     }
 
     @GetMapping("/cancelled")

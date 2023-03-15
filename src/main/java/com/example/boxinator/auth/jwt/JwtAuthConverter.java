@@ -1,4 +1,4 @@
-package com.example.boxinator.auth;
+package com.example.boxinator.auth.jwt;
 
 import lombok.NonNull;
 import org.springframework.core.convert.converter.Converter;

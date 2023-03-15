@@ -1,6 +1,6 @@
 package com.example.boxinator.auth;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.boxinator.auth.jwt.JwtAuthConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +28,7 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests(authorize -> {
             authorize
                     .requestMatchers("/auth/**").permitAll()
-                    .anyRequest().authenticated();
+                    .anyRequest().permitAll();
         });
 
         http.oauth2ResourceServer()
