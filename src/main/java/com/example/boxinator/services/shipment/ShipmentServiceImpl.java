@@ -39,7 +39,7 @@ public class ShipmentServiceImpl implements ShipmentService {
             CountryService countryService,
             AccountService accountService,
             BoxService boxService
-            ) {
+    ) {
         this.feeService = feeService;
         this.shipmentRepo = shipmentRepo;
         this.shipmentStatusRepository = shipmentStatusRepository;
@@ -47,7 +47,6 @@ public class ShipmentServiceImpl implements ShipmentService {
         this.countryService = countryService;
         this.accountService = accountService;
         this.boxService = boxService;
-
     }
 
     @Override
@@ -63,8 +62,10 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     public List<Shipment> getByStatus(Long accountId, Status status) {
-        return shipmentRepo.getShipmentByAccountIdAndStatuses(accountId, status);
+//        return shipmentRepo.getShipmentsByStatus(accountId, status);
+        return null;
     }
+
 
     @Override
     public Fee calculateShipmentCost(Long countryId, Long boxTierId) {
@@ -75,7 +76,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     public Shipment createNewShipment(Long accountId, ShipmentPostDto dto) {
         Shipment ship = shipmentMapper.toShipment(dto);
         ship.setAccount(accountService.getById(accountId));
-        ship.setCost(feeService.calculateShipmentCost(dto.getCountryId(),dto.getBoxTierId()).getAmount());
+        ship.setCost(feeService.calculateShipmentCost(dto.getCountryId(), dto.getBoxTierId()).getAmount());
         shipmentRepo.save(ship);
 
         var status = buildStatus(Status.CREATED, ship);
