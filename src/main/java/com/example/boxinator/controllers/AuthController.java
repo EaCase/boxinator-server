@@ -2,6 +2,7 @@ package com.example.boxinator.controllers;
 
 import com.example.boxinator.auth.client.AuthClient;
 import com.example.boxinator.dtos.auth.AuthRefresh;
+import com.example.boxinator.dtos.auth.AuthRegister;
 import com.example.boxinator.dtos.auth.Credentials;
 import com.example.boxinator.dtos.auth.AuthResponse;
 import org.springframework.http.*;
@@ -36,8 +37,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody Credentials credentials) {
-        var result = authClient.register(credentials);
+    public ResponseEntity<String> register(@RequestBody AuthRegister registrationInfo) {
+        var result = authClient.register(registrationInfo);
         return ResponseEntity.ok().body(result);
     }
 

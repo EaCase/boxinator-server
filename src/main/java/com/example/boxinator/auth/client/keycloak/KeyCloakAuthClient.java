@@ -1,9 +1,11 @@
 package com.example.boxinator.auth.client.keycloak;
 
 import com.example.boxinator.auth.client.AuthClient;
+import com.example.boxinator.dtos.auth.AuthRegister;
 import com.example.boxinator.dtos.auth.AuthResponse;
 import com.example.boxinator.dtos.auth.Credentials;
 import com.example.boxinator.errors.exceptions.ApplicationException;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -46,19 +48,22 @@ public class KeyCloakAuthClient implements AuthClient {
 
 
     @Override
-    public String register(Credentials credentials) {
+    public String register(AuthRegister registrationInfo) {
         AuthResponse serviceAccount = authAsServiceAccount();
         String accessToken = serviceAccount.getAccessToken();
+
         try {
-            new RestTemplate().exchange(
+            var res = new RestTemplate().exchange(
                     URL_REGISTER,
                     HttpMethod.POST,
-                    builder.buildRegisterUserRequest(accessToken, credentials),
-                    AuthResponse.class
+                    builder.buildRegisterUserRequest(accessToken, registrationInfo),
+                    JSONObject.class
             );
             return "Account successfully registered.";
         } catch (RestClientException e) {
-            throw new ApplicationException("Could not register an account with the provided information.", HttpStatus.INTERNAL_SERVER_ERROR);
+            System.out.println(e);
+            e.printStackTrace();
+            throw new ApplicationException("Could not register the account with the provided information.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
