@@ -85,6 +85,7 @@ public class ShipmentController {
         List<ShipmentGetDto> shipmentDtos = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
 
         return ResponseEntity.ok().body(shipmentDtos);
+
     }
 
     @GetMapping("/cancelled")

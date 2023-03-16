@@ -43,6 +43,7 @@ public class ShipmentServiceImpl implements ShipmentService {
             AccountService accountService,
             BoxService boxService,
             AccountRepository accountRepository) {
+
         this.feeService = feeService;
         this.shipmentRepo = shipmentRepo;
         this.shipmentStatusRepository = shipmentStatusRepository;
@@ -50,6 +51,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         this.countryService = countryService;
         this.accountService = accountService;
         this.boxService = boxService;
+
 
         this.accountRepository = accountRepository;
     }
@@ -79,6 +81,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         System.out.println(res);
         System.out.println(res.size());
         return res;
+
     }
 
 
@@ -91,7 +94,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     public Shipment createNewShipment(Long accountId, ShipmentPostDto dto) {
         Shipment ship = shipmentMapper.toShipment(dto);
         ship.setAccount(accountService.getById(accountId));
-        ship.setCost(feeService.calculateShipmentCost(dto.getCountryId(),dto.getBoxTierId()).getAmount());
+        ship.setCost(feeService.calculateShipmentCost(dto.getCountryId(), dto.getBoxTierId()).getAmount());
         shipmentRepo.save(ship);
 
         var status = buildStatus(Status.CREATED, ship);
