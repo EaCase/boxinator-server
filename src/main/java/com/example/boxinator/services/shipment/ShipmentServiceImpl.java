@@ -55,6 +55,11 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     @Override
+    public Shipment create(ShipmentPostDto dto) {
+        return null;
+    }
+
+    @Override
     public Shipment getById(Long id) {
         return shipmentRepo.findById(id)
                 .orElseThrow(() -> new ApplicationException("No shipment with id: " + id, HttpStatus.NOT_FOUND));
@@ -104,13 +109,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         return shipmentStatus;
     }
 
-    @Override
-    public Shipment create(ShipmentPostDto dto) {
 
-        // Maybe not needed since we have above method
-        // "createNewStatus"
-        throw new RuntimeException("Not implemented.");
-    }
 
     @Override
     public List<Shipment> getAll() {
@@ -150,22 +149,37 @@ public class ShipmentServiceImpl implements ShipmentService {
     public Shipment update(Long id, ShipmentPostDto dto) {
 
        Optional <Shipment> optionalShipment = shipmentRepo.findById(id);
-        // TODO Figure out how to update Shipment correctly
+
 
         if(optionalShipment.isEmpty()) {
             throw new ApplicationException("Could not update shipment with that id", HttpStatus.NOT_FOUND);
         }
+
         Shipment shipment = optionalShipment.get();
-        shipment.setRecipient(dto.getRecipient());
-        shipment.setBoxColor(dto.getBoxColor());
-        
+
+        if(dto.getRecipient() != null) {
+            shipment.setRecipient(dto.getRecipient());
+        }
+        if(dto.getBoxColor() != null) {
+            shipment.setBoxColor(dto.getBoxColor());
+        }
+
+        if(dto.getBoxTierId() !=null) {
+            var boxTier = boxService.getById(dto.getBoxTierId());
+            shipment.setBoxTier(boxTier);
+        }
+
+        if(dto.getCountryId() != null) {
+            var countryId = countryService.getById(dto.getCountryId());
+            shipment.setCountry(countryId);
+        }
+
+        // Add more update methods if needed
+
+
 
         return shipmentRepo.save(shipment);
-        //s.setStatuses();
-        //s.setCountry();
-       // s.setCost(Float.valueOf(s.getCost()));
-        // s.setBoxColor(dto.getBoxColor());
-        //   s.setRecipient(dto.getRecipient());
+
 
     }
 }
