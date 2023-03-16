@@ -1,6 +1,7 @@
 package com.example.boxinator.auth.client.keycloak;
 
 
+import com.example.boxinator.dtos.auth.AuthRegister;
 import com.example.boxinator.dtos.auth.Credentials;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -34,7 +35,7 @@ class KeyCloakRequestBuilder {
         );
     }
 
-    public HttpEntity<JSONObject> buildRegisterUserRequest(String accessToken, Credentials credentials) {
+    public HttpEntity<JSONObject> buildRegisterUserRequest(String accessToken, AuthRegister credentials) {
         HttpHeaders headers = buildHeaders(MediaType.APPLICATION_JSON);
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         return new HttpEntity<>(
@@ -77,17 +78,27 @@ class KeyCloakRequestBuilder {
         return body;
     }
 
-    private JSONObject buildRegisterBody(Credentials credentials) {
+    private JSONObject buildRegisterBody(AuthRegister regInfo) {
         var body = new JSONObject();
         var credentialsArr = new JSONArray();
         var credentialsObject = new JSONObject();
         credentialsObject.put("type", "password");
-        credentialsObject.put("value", credentials.getPassword());
+        credentialsObject.put("value", regInfo.getPassword());
         credentialsObject.put("temporary", false);
         credentialsArr.add(credentialsObject);
-        body.put("email", credentials.getUsername());
+
+        var attributeObject = new JSONObject();
+        attributeObject.put("lastName", regInfo.getLastName());
+        attributeObject.put("firstName", regInfo.getFirstName());
+        attributeObject.put("zipCode", regInfo.getZipCode());
+        attributeObject.put("dob", regInfo.getDateOfBirth());
+        attributeObject.put("contactNumber", regInfo.getContactNumber());
+        attributeObject.put("countryId", regInfo.getCountryId());
+
+        body.put("email", regInfo.getEmail());
         body.put("enabled", true);
         body.put("credentials", credentialsArr);
+        body.put("attributes", attributeObject);
         return body;
     }
 
