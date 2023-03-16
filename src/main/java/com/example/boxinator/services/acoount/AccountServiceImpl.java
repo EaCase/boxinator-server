@@ -36,8 +36,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Long deleteById(Long id) {
-        return null;
+    public void deleteById(Long id) {
+
+        throw new RuntimeException("Not implemented.");
     }
 
     @Override

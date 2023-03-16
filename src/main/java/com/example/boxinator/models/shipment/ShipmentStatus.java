@@ -15,6 +15,7 @@ import java.util.Date;
 @Setter
 public class ShipmentStatus {
     @Id
+    @Column(name = "shipment_status_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

@@ -3,11 +3,12 @@ package com.example.boxinator.services.shipment;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.errors.exceptions.ApplicationException;
-import com.example.boxinator.models.account.Account;
+import com.example.boxinator.models.country.Country;
 import com.example.boxinator.models.fee.Fee;
 import com.example.boxinator.models.shipment.Shipment;
 import com.example.boxinator.models.shipment.ShipmentStatus;
 import com.example.boxinator.models.shipment.Status;
+import com.example.boxinator.repositories.account.AccountRepository;
 import com.example.boxinator.repositories.shipment.ShipmentRepository;
 import com.example.boxinator.repositories.shipment.ShipmentStatusRepository;
 import com.example.boxinator.services.acoount.AccountService;
@@ -17,9 +18,10 @@ import com.example.boxinator.services.fee.FeeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class ShipmentServiceImpl implements ShipmentService {
@@ -30,6 +32,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final BoxService boxService;
     private final AccountService accountService;
 
+    private final AccountRepository accountRepository;
     private final ShipmentMapper shipmentMapper;
 
     public ShipmentServiceImpl(
@@ -38,8 +41,9 @@ public class ShipmentServiceImpl implements ShipmentService {
             ShipmentStatusRepository shipmentStatusRepository, ShipmentMapper shipmentMapper,
             CountryService countryService,
             AccountService accountService,
-            BoxService boxService
-    ) {
+            BoxService boxService,
+            AccountRepository accountRepository) {
+
         this.feeService = feeService;
         this.shipmentRepo = shipmentRepo;
         this.shipmentStatusRepository = shipmentStatusRepository;
@@ -47,6 +51,14 @@ public class ShipmentServiceImpl implements ShipmentService {
         this.countryService = countryService;
         this.accountService = accountService;
         this.boxService = boxService;
+
+
+        this.accountRepository = accountRepository;
+    }
+
+    @Override
+    public Shipment create(ShipmentPostDto dto) {
+        return null;
     }
 
     @Override
@@ -56,14 +68,20 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     @Override
-    public List<Account> getAccountShipments(Long id) {
-        return null;
+    public List<Shipment> getAccountShipments(Long id) {
+
+        // ACCOUNTREPOSITORY HAS NATIVE QUERY
+
+        return shipmentRepo.findAllByAccountId(id);
     }
 
     @Override
     public List<Shipment> getByStatus(Long accountId, Status status) {
-//        return shipmentRepo.getShipmentsByStatus(accountId, status);
-        return null;
+        var res = shipmentRepo.getShipmentsByStatus(accountId, status.ordinal());
+        System.out.println(res);
+        System.out.println(res.size());
+        return res;
+
     }
 
 
@@ -94,23 +112,77 @@ public class ShipmentServiceImpl implements ShipmentService {
         return shipmentStatus;
     }
 
-    @Override
-    public Shipment create(ShipmentPostDto dto) {
-        throw new RuntimeException("Not implemented.");
-    }
+
 
     @Override
     public List<Shipment> getAll() {
-        throw new RuntimeException("Not implemented.");
+
+        return shipmentRepo.findAll();
+
     }
 
     @Override
-    public Long deleteById(Long id) {
-        throw new RuntimeException("Not implemented.");
+    public void deleteById(Long id) {
+
+
+        // TODO Admin only
+
+        shipmentRepo.findById(id)
+                .orElseThrow(() -> new ApplicationException("Shipment with this id does not exist.", HttpStatus.NOT_FOUND));
+
+        // Delete all ShipmentStatuses belonging to this shipment id
+        // DELETE FROM statustable WHERE shipment_id = {ID}
+        // shipmentStatusRepository.deletestatuses(shipmentId)
+
+        shipmentRepo.deleteById(id);
+    }
+
+    @Override
+    public Shipment updateShipmentStatus(Long id, Status status){
+        Shipment shipment = shipmentRepo.findById(id)
+                .orElseThrow(() -> new ApplicationException("No shipment with that id", HttpStatus.NOT_FOUND));
+
+        var shipmentStatus = buildStatus(status, shipment);
+        shipmentStatusRepository.save(shipmentStatus);
+
+        return shipment;
     }
 
     @Override
     public Shipment update(Long id, ShipmentPostDto dto) {
-        throw new RuntimeException("Not implemented.");
+
+       Optional <Shipment> optionalShipment = shipmentRepo.findById(id);
+
+
+        if(optionalShipment.isEmpty()) {
+            throw new ApplicationException("Could not update shipment with that id", HttpStatus.NOT_FOUND);
+        }
+
+        Shipment shipment = optionalShipment.get();
+
+        if(dto.getRecipient() != null) {
+            shipment.setRecipient(dto.getRecipient());
+        }
+        if(dto.getBoxColor() != null) {
+            shipment.setBoxColor(dto.getBoxColor());
+        }
+
+        if(dto.getBoxTierId() !=null) {
+            var boxTier = boxService.getById(dto.getBoxTierId());
+            shipment.setBoxTier(boxTier);
+        }
+
+        if(dto.getCountryId() != null) {
+            var countryId = countryService.getById(dto.getCountryId());
+            shipment.setCountry(countryId);
+        }
+
+        // Add more update methods if needed
+
+
+
+        return shipmentRepo.save(shipment);
+
+
     }
 }

@@ -6,4 +6,6 @@ import com.example.boxinator.services.shared.CrudService;
 import org.springframework.stereotype.Service;
 
 @Service
-public interface CountryService extends CrudService<Country, CountryPostDto> {}
+public interface CountryService extends CrudService<Country, CountryPostDto> {
+    void delete(Long id);
+}
