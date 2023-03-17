@@ -3,7 +3,6 @@ package com.example.boxinator.services.shipment;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.errors.exceptions.ApplicationException;
-import com.example.boxinator.models.country.Country;
 import com.example.boxinator.models.fee.Fee;
 import com.example.boxinator.models.shipment.Shipment;
 import com.example.boxinator.models.shipment.ShipmentStatus;
@@ -19,9 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class ShipmentServiceImpl implements ShipmentService {
@@ -42,21 +42,43 @@ public class ShipmentServiceImpl implements ShipmentService {
             CountryService countryService,
             AccountService accountService,
             BoxService boxService,
-            AccountRepository accountRepository) {
+            AccountRepository accountRepository
+    ) {
         this.feeService = feeService;
         this.shipmentRepo = shipmentRepo;
-        this.shipmentStatusRepository = shipmentStatusRepository;
         this.shipmentMapper = shipmentMapper;
         this.countryService = countryService;
         this.accountService = accountService;
         this.boxService = boxService;
-
+        this.shipmentStatusRepository = shipmentStatusRepository;
         this.accountRepository = accountRepository;
     }
 
     @Override
     public Shipment create(ShipmentPostDto dto) {
         return null;
+    }
+
+    @Override
+    public List<Shipment> getShipmentsFiltered(Long accountId, Date from, Date to, List<Status> statuses) {
+        // Call repo methods based on the filters
+
+
+
+        var allStatuses = Arrays.stream(Status.values()).map(Enum::ordinal).toList();
+
+          if (statuses != null && from != null && to != null) {
+            // get shipments based on status date from and date to
+            return shipmentRepo.findAllByAccountAndDateBetween(accountId, from, to, statuses.stream().map(Enum::ordinal).toList());
+        }
+          else if (from != null && to != null) {
+             // get shipments based on date range only;
+             return shipmentRepo.findAllByAccountAndDateBetween(accountId, from, to, allStatuses);
+         }
+          else {
+            // get all shipments
+            return shipmentRepo.findAllByAccountId(accountId);
+        }
     }
 
     @Override
@@ -79,6 +101,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         System.out.println(res);
         System.out.println(res.size());
         return res;
+
     }
 
 
@@ -91,7 +114,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     public Shipment createNewShipment(Long accountId, ShipmentPostDto dto) {
         Shipment ship = shipmentMapper.toShipment(dto);
         ship.setAccount(accountService.getById(accountId));
-        ship.setCost(feeService.calculateShipmentCost(dto.getCountryId(),dto.getBoxTierId()).getAmount());
+        ship.setCost(feeService.calculateShipmentCost(dto.getCountryId(), dto.getBoxTierId()).getAmount());
         shipmentRepo.save(ship);
 
         var status = buildStatus(Status.CREATED, ship);
@@ -148,7 +171,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public Shipment update(Long id, ShipmentPostDto dto) {
 
-       Optional <Shipment> optionalShipment = shipmentRepo.findById(id);
+        Optional <Shipment> optionalShipment = shipmentRepo.findById(id);
 
 
         if(optionalShipment.isEmpty()) {

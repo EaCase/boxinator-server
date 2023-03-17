@@ -14,10 +14,17 @@ import com.example.boxinator.services.shipment.ShipmentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.ZoneOffset;
+import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,11 +59,29 @@ public class ShipmentController {
     public ResponseEntity<List<ShipmentGetDto>> getAllShipments(
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            @RequestParam Long accountId
     ) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(from, formatter);
+        Instant instant = localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Date startDate = Date.from(instant);
 
-        List<ShipmentGetDto> shipments = shipmentService.getAll().stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
-        return ResponseEntity.ok().body(shipments);
+        LocalDate localDateTo = LocalDate.parse(to, formatter);
+        Instant instantTo = localDateTo.atTime(23, 59, 59).toInstant(ZoneOffset.UTC);
+        Date endDate = Date.from(instantTo);
+
+        List<Status> statusEnum = null;
+
+        if(status != null) {
+            statusEnum=List.of(Status.fromString(status));
+        }
+
+
+        var shipments = shipmentService.getShipmentsFiltered(accountId, startDate, endDate, statusEnum);
+        var shipmentDTOs = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
+
+        return ResponseEntity.ok().body(shipmentDTOs);
         /*
         Retrieve a list of shipments relevant to the authenticated user.
         A user will see only their shipments.
@@ -85,6 +110,7 @@ public class ShipmentController {
         List<ShipmentGetDto> shipmentDtos = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
 
         return ResponseEntity.ok().body(shipmentDtos);
+
     }
 
     @GetMapping("/cancelled")
@@ -103,7 +129,7 @@ public class ShipmentController {
         List<ShipmentGetDto> shipmentDtos = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
         return ResponseEntity.ok().body(shipmentDtos);
 
-       //throw new RuntimeException("Not implemented.");
+        //throw new RuntimeException("Not implemented.");
 
     }
 
@@ -215,17 +241,16 @@ public class ShipmentController {
     )
     public ResponseEntity<ShipmentGetDto> updateShipment(@PathVariable Long id, @RequestBody ShipmentPostDto shipmentPost) {
 
-     //   ShipmentPostDto postDto = shipmentMapper.toShipment(shipmentPost);
+        //   ShipmentPostDto postDto = shipmentMapper.toShipment(shipmentPost);
 
-     //   Shipment updateShipment = shipmentService.update(id, postDto);
+        //   Shipment updateShipment = shipmentService.update(id, postDto);
 
-     //   ShipmentGetDto getDto = shipmentMapper.toShipmentDto(updateShipment);
+        //   ShipmentGetDto getDto = shipmentMapper.toShipmentDto(updateShipment);
 
         return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipmentService.update(id, shipmentPost)));
 
-       // return ResponseEntity.ok(getDto);
+        // return ResponseEntity.ok(getDto);
 
-       // throw new RuntimeException("Not implemented.");
 
     }
 

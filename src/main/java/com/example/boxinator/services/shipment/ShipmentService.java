@@ -9,6 +9,7 @@ import com.example.boxinator.models.shipment.Status;
 import com.example.boxinator.services.shared.CrudService;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -22,4 +23,6 @@ public interface ShipmentService extends CrudService<Shipment, ShipmentPostDto> 
     Shipment createNewShipment(Long accountId, ShipmentPostDto dto);
 
     Shipment updateShipmentStatus(Long id, Status status);
+
+    List<Shipment> getShipmentsFiltered(Long accountId, Date from, Date to, List<Status> statuses);
 }

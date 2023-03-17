@@ -34,7 +34,6 @@ public class Shipment {
 
     @Column(nullable = false)
     private Float cost;
-
     @Column(nullable = false)
     private String recipient;
 
