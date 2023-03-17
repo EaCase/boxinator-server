@@ -30,4 +30,6 @@ public class AuthResponse {
     String notBeforePolicy;
 
     String scope;
+
+    String accountType;
 }
