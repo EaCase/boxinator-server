@@ -43,6 +43,7 @@ public class AuthController {
 //        if (!bucket.tryConsume(1)) {
 //            throw new ApplicationException("Too many requests.", HttpStatus.TOO_MANY_REQUESTS);
 //        }
+        // TODO Claims in tokens
         var result = authClient.login(credentials);
         return ResponseEntity.ok().body(result);
     }
