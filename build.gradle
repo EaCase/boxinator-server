@@ -19,6 +19,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     runtimeOnly 'org.postgresql:postgresql'
 
+    // Bucket4j
+    implementation group: 'com.github.vladimir-bukhtoyarov', name: 'bucket4j-core', version: '7.6.0'
+
     // Spring config annotation
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 

@@ -3,6 +3,7 @@ package com.example.boxinator.auth.client.keycloak;
 
 import com.example.boxinator.dtos.auth.AuthRegister;
 import com.example.boxinator.dtos.auth.Credentials;
+import com.example.boxinator.models.account.AccountType;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,11 +36,11 @@ class KeyCloakRequestBuilder {
         );
     }
 
-    public HttpEntity<JSONObject> buildRegisterUserRequest(String accessToken, AuthRegister credentials) {
+    public HttpEntity<JSONObject> buildRegisterUserRequest(String accessToken, AuthRegister credentials, AccountType type) {
         HttpHeaders headers = buildHeaders(MediaType.APPLICATION_JSON);
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         return new HttpEntity<>(
-                buildRegisterBody(credentials),
+                buildRegisterBody(credentials, type),
                 headers
         );
     }
@@ -78,7 +79,7 @@ class KeyCloakRequestBuilder {
         return body;
     }
 
-    private JSONObject buildRegisterBody(AuthRegister regInfo) {
+    private JSONObject buildRegisterBody(AuthRegister regInfo, AccountType type) {
         var body = new JSONObject();
         var credentialsArr = new JSONArray();
         var credentialsObject = new JSONObject();
@@ -94,6 +95,7 @@ class KeyCloakRequestBuilder {
         attributeObject.put("dob", regInfo.getDateOfBirth());
         attributeObject.put("contactNumber", regInfo.getContactNumber());
         attributeObject.put("countryId", regInfo.getCountryId());
+        attributeObject.put("accountType", AccountType.asString(type));
 
         body.put("email", regInfo.getEmail());
         body.put("enabled", true);

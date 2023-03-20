@@ -39,12 +39,7 @@ public class BoxController {
                     array = @ArraySchema(schema = @Schema(implementation = BoxTierGetDto.class))
             )}
     )
-    public ResponseEntity<List<BoxTierGetDto>> getBoxTiers(Principal principal) {
-        JwtAuthenticationToken token = (JwtAuthenticationToken) principal;
-        System.out.println(token.getCredentials());
-        System.out.println(token.getTokenAttributes());
-        System.out.println(token.getToken());
-        System.out.println(AccountType.getAccountType(token.getAuthorities()));
+    public ResponseEntity<List<BoxTierGetDto>> getBoxTiers() {
         var result = boxService.getAllBoxTiers();
         return ResponseEntity.ok().body(result.stream().map(boxTierMapper::toDto).toList());
     }

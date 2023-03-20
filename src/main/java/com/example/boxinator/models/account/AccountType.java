@@ -24,4 +24,12 @@ public enum AccountType {
         }
         return Optional.empty();
     }
+
+    public static String asString(AccountType accountType) {
+        return switch (accountType) {
+            case ADMIN -> "admin";
+            case REGISTERED_USER -> "user";
+            case GUEST -> "guest";
+        };
+    }
 }
