@@ -4,7 +4,9 @@ import com.example.boxinator.models.account.Account;
 import com.example.boxinator.models.box.BoxTier;
 import com.example.boxinator.models.country.Country;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
