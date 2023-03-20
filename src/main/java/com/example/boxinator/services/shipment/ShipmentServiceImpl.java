@@ -42,15 +42,19 @@ public class ShipmentServiceImpl implements ShipmentService {
             CountryService countryService,
             AccountService accountService,
             BoxService boxService,
+
             AccountRepository accountRepository
     ) {
+
         this.feeService = feeService;
         this.shipmentRepo = shipmentRepo;
         this.shipmentMapper = shipmentMapper;
         this.countryService = countryService;
         this.accountService = accountService;
         this.boxService = boxService;
+
         this.shipmentStatusRepository = shipmentStatusRepository;
+
         this.accountRepository = accountRepository;
     }
 
