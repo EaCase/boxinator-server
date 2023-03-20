@@ -7,45 +7,39 @@ import com.example.boxinator.dtos.auth.Credentials;
 import com.example.boxinator.dtos.auth.AuthResponse;
 import com.example.boxinator.errors.exceptions.ApplicationException;
 import com.example.boxinator.models.account.AccountType;
-import io.github.bucket4j.Bandwidth;
+import com.example.boxinator.ratelimiter.IpRateLimiter;
+import com.example.boxinator.ratelimiter.RateLimiterService;
+import com.example.boxinator.utils.HttpUtils;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
+import io.github.bucket4j.ConsumptionProbe;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.Duration;
 
 @RestController
 @RequestMapping(value = "auth")
 public class AuthController {
-
-    //    private final Bucket bucket;
+    private static final long SECOND_NANO = 1_000_000_000;
+    private final RateLimiterService rateLimiterService;
     private final AuthClient authClient;
 
-    public AuthController(AuthClient authClient) {
+    public AuthController(AuthClient authClient, IpRateLimiter rateLimiterService) {
         this.authClient = authClient;
+        this.rateLimiterService = rateLimiterService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody Credentials credentials) {
-        /*
-            Authenticates a user. Accepts appropriate parameters in the request body as application/json.
-            This should also return their account type (customer, or administrator – See Appendix A).
-            You will need this to determine what is or is not displayed on your front end. Make use
-            of best practices and use a Basic Authentication token in the HTTP Header.
+    public ResponseEntity<AuthResponse> login(@RequestBody Credentials credentials, HttpServletRequest request) {
+        Bucket bucket = rateLimiterService.resolveBucket(HttpUtils.getRequestIP(request));
+        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
-            A failed authentication attempt should prompt a 401 Unauthorized response. This
-            endpoint should also be subject to a rate limiting policy where if authentication is
-            attempted too many times (unsuccessfully) then requests from the corresponding address
-            should be temporarily ignored. Candidates should decide on an appropriate threshold
-            for rate limiting.
-        */
-//        if (!bucket.tryConsume(1)) {
-//            throw new ApplicationException("Too many requests.", HttpStatus.TOO_MANY_REQUESTS);
-//        }
-        // TODO Claims in tokens
-        var result = authClient.login(credentials);
-        return ResponseEntity.ok().body(result);
+        if (probe.isConsumed()) {
+            var result = authClient.login(credentials);
+            return ResponseEntity.ok().body(result);
+        }
+
+        long refillTime = probe.getNanosToWaitForRefill() / SECOND_NANO;
+        throw new ApplicationException("Too many requests. Retry after " + refillTime + " seconds.", HttpStatus.TOO_MANY_REQUESTS);
     }
 
     @PostMapping("/register")
