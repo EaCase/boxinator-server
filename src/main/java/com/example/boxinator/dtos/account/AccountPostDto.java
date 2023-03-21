@@ -5,10 +5,9 @@ import lombok.Data;
 
 @Data
 public class AccountPostDto {
-    private String accountEmail;
-    private String accountDob;
-    private String accountFirstName;
-    private String accountLastName;
+    private String dateOfBirth;
+    private String firstName;
+    private String lastName;
     private String zipCode;
     private String contactNumber;
     private Long countryId;

@@ -14,4 +14,6 @@ public interface AuthClient {
     AuthResponse refresh(String refreshToken);
 
     String register(AuthRegister registrationInfo, AccountType type);
+
+    String delete(String accountId);
 }

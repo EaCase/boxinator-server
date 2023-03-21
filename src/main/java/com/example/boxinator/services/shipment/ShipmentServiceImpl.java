@@ -10,7 +10,7 @@ import com.example.boxinator.models.shipment.Status;
 import com.example.boxinator.repositories.account.AccountRepository;
 import com.example.boxinator.repositories.shipment.ShipmentRepository;
 import com.example.boxinator.repositories.shipment.ShipmentStatusRepository;
-import com.example.boxinator.services.acoount.AccountService;
+import com.example.boxinator.services.account.AccountService;
 import com.example.boxinator.services.box.BoxService;
 import com.example.boxinator.services.country.CountryService;
 import com.example.boxinator.services.fee.FeeService;
@@ -107,7 +107,6 @@ public class ShipmentServiceImpl implements ShipmentService {
         return res;
 
     }
-
 
     @Override
     public Fee calculateShipmentCost(Long countryId, Long boxTierId) {

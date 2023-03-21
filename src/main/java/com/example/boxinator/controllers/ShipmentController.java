@@ -6,7 +6,6 @@ import com.example.boxinator.dtos.shipment.ShipmentGetDto;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.models.shipment.Shipment;
-import com.example.boxinator.models.shipment.ShipmentStatus;
 import com.example.boxinator.models.shipment.Status;
 import com.example.boxinator.repositories.shipment.ShipmentRepository;
 import com.example.boxinator.services.shipment.ShipmentService;
@@ -23,12 +22,11 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+@CrossOrigin
 @RestController
 @RequestMapping(value = "shipments")
 public class ShipmentController {
