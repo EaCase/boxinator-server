@@ -4,13 +4,13 @@ import lombok.Data;
 
 @Data
 public class AuthRegister {
-    String email;
-    String password;
-    String dateOfBirth;
-    String firstName;
-    String lastName;
-    String zipCode;
-    String contactNumber;
-    String countryId;
+    private String email;
+    private String password;
+    private String dateOfBirth;
+    private String firstName;
+    private String lastName;
+    private String zipCode;
+    private String contactNumber;
+    private Long countryId;
 }
 

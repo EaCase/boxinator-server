@@ -1,6 +1,7 @@
 package com.example.boxinator.auth.client.keycloak;
 
 
+import com.example.boxinator.dtos.account.AccountPostDto;
 import com.example.boxinator.dtos.auth.AuthRegister;
 import com.example.boxinator.dtos.auth.Credentials;
 import com.example.boxinator.models.account.AccountType;
@@ -13,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import java.util.List;
 
 @Component
 class KeyCloakRequestBuilder {
@@ -36,11 +39,19 @@ class KeyCloakRequestBuilder {
         );
     }
 
-    public HttpEntity<JSONObject> buildRegisterUserRequest(String accessToken, AuthRegister credentials, AccountType type) {
+    public HttpEntity<JSONObject> buildRegisterUserRequest(String serviceAccountAccessToken, AuthRegister credentials, AccountType type) {
         HttpHeaders headers = buildHeaders(MediaType.APPLICATION_JSON);
-        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + serviceAccountAccessToken);
         return new HttpEntity<>(
                 buildRegisterBody(credentials, type),
+                headers
+        );
+    }
+
+    public HttpEntity<?> buildDeleteUserRequest(String serviceAccountAccessToken) {
+        HttpHeaders headers = buildHeaders(MediaType.APPLICATION_JSON);
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + serviceAccountAccessToken);
+        return new HttpEntity<>(
                 headers
         );
     }
@@ -79,6 +90,7 @@ class KeyCloakRequestBuilder {
         return body;
     }
 
+
     private JSONObject buildRegisterBody(AuthRegister regInfo, AccountType type) {
         var body = new JSONObject();
         var credentialsArr = new JSONArray();
@@ -95,9 +107,8 @@ class KeyCloakRequestBuilder {
         attributeObject.put("dob", regInfo.getDateOfBirth());
         attributeObject.put("contactNumber", regInfo.getContactNumber());
         attributeObject.put("countryId", regInfo.getCountryId());
-        attributeObject.put("accountType", AccountType.asString(type));
 
-        body.put("email", regInfo.getEmail());
+        body.put("username", regInfo.getEmail());
         body.put("enabled", true);
         body.put("credentials", credentialsArr);
         body.put("attributes", attributeObject);

@@ -6,26 +6,30 @@ import com.example.boxinator.dtos.auth.AuthResponse;
 import com.example.boxinator.dtos.auth.Credentials;
 import com.example.boxinator.errors.exceptions.ApplicationException;
 import com.example.boxinator.models.account.AccountType;
+import com.example.boxinator.services.account.AccountService;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Objects;
 
 @Component
 public class KeyCloakAuthClient implements AuthClient {
     @Value("${auth.url.login}")
     private String URL_LOGIN;
 
-    @Value("${auth.url.register}")
-    private String URL_REGISTER;
+    @Value("${auth.url.users}")
+    private String URL_USERS;
 
     private final KeyCloakRequestBuilder builder;
+    private final AccountService accountService;
 
-    public KeyCloakAuthClient(KeyCloakRequestBuilder builder) {
+    public KeyCloakAuthClient(KeyCloakRequestBuilder builder, AccountService accountService) {
         this.builder = builder;
+        this.accountService = accountService;
     }
 
     @Override
@@ -59,15 +63,21 @@ public class KeyCloakAuthClient implements AuthClient {
     @Override
     public String register(AuthRegister registrationInfo, AccountType type) {
         AuthResponse serviceAccount = authAsServiceAccount();
-        String accessToken = serviceAccount.getAccessToken();
+        String serviceAccountToken = serviceAccount.getAccessToken();
 
         try {
             var res = new RestTemplate().exchange(
-                    URL_REGISTER,
+                    URL_USERS,
                     HttpMethod.POST,
-                    builder.buildRegisterUserRequest(accessToken, registrationInfo, type),
+                    builder.buildRegisterUserRequest(serviceAccountToken, registrationInfo, type),
                     JSONObject.class
             );
+
+            String userId = Objects.requireNonNull(res.getHeaders().get(HttpHeaders.LOCATION))
+                    .get(0).replaceAll(".*/", "");
+
+            // todo assign roles
+            accountService.register(registrationInfo, userId);
             return "Account successfully registered.";
         } catch (RestClientResponseException e) {
             if (e.getStatusCode() == HttpStatus.CONFLICT) {
@@ -77,6 +87,20 @@ public class KeyCloakAuthClient implements AuthClient {
             e.printStackTrace();
             throw new ApplicationException("Could not register the account with the provided information.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public String delete(String accountId) {
+        AuthResponse serviceAccount = authAsServiceAccount();
+        String serviceAccountToken = serviceAccount.getAccessToken();
+        new RestTemplate().exchange(
+                URL_USERS + "/" + accountId,
+                HttpMethod.DELETE,
+                builder.buildDeleteUserRequest(serviceAccountToken),
+                JSONObject.class
+        );
+        accountService.deleteByProviderId(accountId);
+        return accountId;
     }
 
     private AuthResponse authAsServiceAccount() {
