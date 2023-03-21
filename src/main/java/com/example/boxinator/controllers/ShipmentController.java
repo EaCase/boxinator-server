@@ -71,8 +71,8 @@ public class ShipmentController {
 
         List<Status> statusEnum = null;
 
-        if(status != null) {
-            statusEnum=List.of(Status.fromString(status));
+        if (status != null) {
+            statusEnum = List.of(Status.fromString(status));
         }
 
 

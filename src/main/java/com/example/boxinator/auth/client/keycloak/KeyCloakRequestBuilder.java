@@ -25,25 +25,40 @@ class KeyCloakRequestBuilder {
     @Value("${auth.client}")
     private String CLIENT;
 
-    public HttpEntity<MultiValueMap<String, String>> buildLoginRequest(Credentials credentials) {
+    @Value("${auth.role.admin.id}")
+    private String ROLE_ID_ADMIN;
+
+    @Value("${auth.role.user.id}")
+    private String ROLE_ID_USER;
+
+    public HttpEntity<?> buildLoginRequest(Credentials credentials) {
         return new HttpEntity<>(
                 buildLoginBody(credentials),
                 buildHeaders(MediaType.APPLICATION_FORM_URLENCODED)
         );
     }
 
-    public HttpEntity<MultiValueMap<String, String>> buildRefreshRequest(String refreshToken) {
+    public HttpEntity<?> buildRefreshRequest(String refreshToken) {
         return new HttpEntity<>(
                 buildRefreshTokenBody(refreshToken),
                 buildHeaders(MediaType.APPLICATION_FORM_URLENCODED)
         );
     }
 
-    public HttpEntity<JSONObject> buildRegisterUserRequest(String serviceAccountAccessToken, AuthRegister credentials, AccountType type) {
+    public HttpEntity<?> buildRegisterUserRequest(String serviceAccountAccessToken, AuthRegister credentials, AccountType type) {
         HttpHeaders headers = buildHeaders(MediaType.APPLICATION_JSON);
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + serviceAccountAccessToken);
         return new HttpEntity<>(
                 buildRegisterBody(credentials, type),
+                headers
+        );
+    }
+
+    public HttpEntity<?> buildRoleEditRequest(String serviceAccountAccessToken, AccountType type) {
+        HttpHeaders headers = buildHeaders(MediaType.APPLICATION_JSON);
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + serviceAccountAccessToken);
+        return new HttpEntity<>(
+                buildEditRoleBody(type),
                 headers
         );
     }
@@ -56,11 +71,29 @@ class KeyCloakRequestBuilder {
         );
     }
 
-    public HttpEntity<MultiValueMap<String, String>> buildAuthenticateServiceAccountRequest() {
+    public HttpEntity<?> buildAuthenticateServiceAccountRequest() {
         return new HttpEntity<>(
                 buildServiceAccountLoginBody(),
                 buildHeaders(MediaType.APPLICATION_FORM_URLENCODED)
         );
+    }
+
+    private JSONArray buildEditRoleBody(AccountType type) {
+        var arr = new JSONArray();
+        var obj = new JSONObject();
+
+        switch (type) {
+            case ADMIN -> {
+                obj.put("name", "admin");
+                obj.put("id", ROLE_ID_ADMIN);
+            }
+            case REGISTERED_USER -> {
+                obj.put("name", "user");
+                obj.put("id", ROLE_ID_USER);
+            }
+        }
+        arr.add(obj);
+        return arr;
     }
 
     private MultiValueMap<String, String> buildLoginBody(Credentials credentials) {

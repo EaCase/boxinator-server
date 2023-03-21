@@ -14,8 +14,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableMethodSecurity
 public class WebSecurityConfig {
-    public static final String ADMIN = "admin";
-    public static final String USER = "user";
     private final JwtAuthConverter jwtAuthConverter;
 
     @Bean
@@ -29,7 +27,7 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests(authorize -> {
             authorize
                     .requestMatchers("/auth/**").permitAll()
-                    .anyRequest().authenticated();
+                    .anyRequest().permitAll();
         });
 
         http.oauth2ResourceServer()

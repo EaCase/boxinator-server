@@ -24,6 +24,9 @@ public class KeyCloakAuthClient implements AuthClient {
     @Value("${auth.url.users}")
     private String URL_USERS;
 
+    @Value("${auth.client.id}")
+    private String KEYCLOAK_CLIENT_ID;
+
     private final KeyCloakRequestBuilder builder;
     private final AccountService accountService;
 
@@ -35,12 +38,15 @@ public class KeyCloakAuthClient implements AuthClient {
     @Override
     public AuthResponse login(Credentials credentials) {
         try {
-            return new RestTemplate().exchange(
+            var response = new RestTemplate().exchange(
                     URL_LOGIN,
                     HttpMethod.POST,
                     builder.buildLoginRequest(credentials),
                     AuthResponse.class
             ).getBody();
+
+            // TODO set accountType
+            return response;
         } catch (RestClientResponseException e) {
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 throw new ApplicationException("Invalid user credentials.", HttpStatus.UNAUTHORIZED);
@@ -76,16 +82,29 @@ public class KeyCloakAuthClient implements AuthClient {
             String userId = Objects.requireNonNull(res.getHeaders().get(HttpHeaders.LOCATION))
                     .get(0).replaceAll(".*/", "");
 
-            // todo assign roles
+            var roleResponse = new RestTemplate().exchange(
+                    URL_USERS + "/" + userId + "/role-mappings/clients/" + KEYCLOAK_CLIENT_ID,
+                    HttpMethod.POST,
+                    builder.buildRoleEditRequest(serviceAccountToken, type),
+                    JSONObject.class
+            );
+
+            if (roleResponse.getStatusCode() != HttpStatus.NO_CONTENT) {
+                System.err.println("Failed to set user roles.");
+                throw new RuntimeException("Something went wrong.");
+            }
+
             accountService.register(registrationInfo, userId);
+
             return "Account successfully registered.";
         } catch (RestClientResponseException e) {
             if (e.getStatusCode() == HttpStatus.CONFLICT) {
                 throw new ApplicationException("The provided email is already in use.", HttpStatus.CONFLICT);
             }
-            System.out.println(e);
             e.printStackTrace();
             throw new ApplicationException("Could not register the account with the provided information.", HttpStatus.INTERNAL_SERVER_ERROR);
+        } finally {
+            // TODO Delete registered data
         }
     }
 
