@@ -1,19 +1,26 @@
 package com.example.boxinator.auth.client.keycloak;
 
 import com.example.boxinator.auth.client.AuthClient;
+import com.example.boxinator.auth.jwt.JwtAuthConverter;
 import com.example.boxinator.dtos.auth.AuthRegister;
 import com.example.boxinator.dtos.auth.AuthResponse;
 import com.example.boxinator.dtos.auth.Credentials;
 import com.example.boxinator.errors.exceptions.ApplicationException;
 import com.example.boxinator.models.account.AccountType;
 import com.example.boxinator.services.account.AccountService;
+import com.nimbusds.jose.shaded.gson.Gson;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Base64;
 import java.util.Objects;
 
 @Component
@@ -27,6 +34,9 @@ public class KeyCloakAuthClient implements AuthClient {
     @Value("${auth.client.id}")
     private String KEYCLOAK_CLIENT_ID;
 
+    @Value("${auth.client}")
+    private String KEYCLOAK_CLIENT;
+
     private final KeyCloakRequestBuilder builder;
     private final AccountService accountService;
 
@@ -38,15 +48,12 @@ public class KeyCloakAuthClient implements AuthClient {
     @Override
     public AuthResponse login(Credentials credentials) {
         try {
-            var response = new RestTemplate().exchange(
+            return withAccountType(Objects.requireNonNull(new RestTemplate().exchange(
                     URL_LOGIN,
                     HttpMethod.POST,
                     builder.buildLoginRequest(credentials),
                     AuthResponse.class
-            ).getBody();
-
-            // TODO set accountType
-            return response;
+            ).getBody()));
         } catch (RestClientResponseException e) {
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 throw new ApplicationException("Invalid user credentials.", HttpStatus.UNAUTHORIZED);
@@ -57,12 +64,12 @@ public class KeyCloakAuthClient implements AuthClient {
 
     @Override
     public AuthResponse refresh(String refreshToken) {
-        return new RestTemplate().exchange(
+        return withAccountType(Objects.requireNonNull(new RestTemplate().exchange(
                 URL_LOGIN,
                 HttpMethod.POST,
                 builder.buildRefreshRequest(refreshToken),
                 AuthResponse.class
-        ).getBody();
+        ).getBody()));
     }
 
 
@@ -130,4 +137,23 @@ public class KeyCloakAuthClient implements AuthClient {
                 AuthResponse.class
         ).getBody();
     }
+
+
+    private AuthResponse withAccountType(AuthResponse response) {
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+        String[] chunks = response.getAccessToken().split("\\.");
+        var g = new Gson();
+        JSONObject payload = g.fromJson(new String(decoder.decode(chunks[1])), JSONObject.class);
+        var resAccess = g.fromJson(payload.getAsString("resource_access"), JSONObject.class);
+        var client = g.fromJson(resAccess.getAsString(KEYCLOAK_CLIENT), JSONObject.class);
+        var roles = g.fromJson(client.getAsString("roles"), JSONArray.class);
+
+        if (roles.contains("admin")) {
+            response.setAccountType(AccountType.ADMIN);
+        } else if (roles.contains("user")) {
+            response.setAccountType(AccountType.REGISTERED_USER);
+        }
+        return response;
+    }
+
 }
