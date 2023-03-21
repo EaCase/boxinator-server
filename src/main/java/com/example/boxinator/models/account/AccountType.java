@@ -11,11 +11,11 @@ public enum AccountType {
     public static AccountType getAccountType(Collection<? extends GrantedAuthority> collection) {
         for (GrantedAuthority auth : collection) {
             switch (auth.getAuthority()) {
-                case "ROLE_user" -> {
-                    return AccountType.REGISTERED_USER;
-                }
                 case "ROLE_admin" -> {
                     return AccountType.ADMIN;
+                }
+                case "ROLE_user" -> {
+                    return AccountType.REGISTERED_USER;
                 }
                 default -> {
                     // Not account type claim
