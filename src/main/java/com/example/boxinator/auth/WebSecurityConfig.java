@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,7 +28,12 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests(authorize -> {
             authorize
                     .requestMatchers("/auth/**").permitAll()
-                    .anyRequest().permitAll();
+                    .requestMatchers("/swagger-ui/**").permitAll()
+                    .requestMatchers("/v3/api-docs/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/boxes/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/shipments/cost/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/settings/countries/**").permitAll()
+                    .anyRequest().authenticated();
         });
 
         http.oauth2ResourceServer()
