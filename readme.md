@@ -1,4 +1,4 @@
-## Boxinator-server
+# Boxinator-server
 
 This repository contains a REST API for the Boxinator application.
 
@@ -6,8 +6,8 @@ This repository contains a REST API for the Boxinator application.
 
 1. Setup keycloak with the instructions from [this](https://github.com/EaCase/keycloak-docker-compose) repository.
 2. Setup Postgres instance.
-3. Create an `application.properties` file into `src/resources/` folder, and copy the file below. Replace the postgres
-   properties to match your configuration. No need to touch other config when using keycloak from step 1.
+3. Create an `application.properties` file into `src/main/resources/` folder, and copy the file below. Replace the
+   postgres properties to match your configuration. No need to touch other config when using keycloak from step 1.
 
 ```properties
 spring.datasource.url={postgres_url}
