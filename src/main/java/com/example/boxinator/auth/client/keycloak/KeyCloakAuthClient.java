@@ -1,7 +1,6 @@
 package com.example.boxinator.auth.client.keycloak;
 
 import com.example.boxinator.auth.client.AuthClient;
-import com.example.boxinator.auth.jwt.JwtAuthConverter;
 import com.example.boxinator.dtos.auth.AuthRegister;
 import com.example.boxinator.dtos.auth.AuthResponse;
 import com.example.boxinator.dtos.auth.Credentials;
@@ -11,11 +10,8 @@ import com.example.boxinator.services.account.AccountService;
 import com.nimbusds.jose.shaded.gson.Gson;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -105,13 +101,12 @@ public class KeyCloakAuthClient implements AuthClient {
 
             return "Account successfully registered.";
         } catch (RestClientResponseException e) {
+            // TODO Delete registered data
             if (e.getStatusCode() == HttpStatus.CONFLICT) {
                 throw new ApplicationException("The provided email is already in use.", HttpStatus.CONFLICT);
             }
             e.printStackTrace();
             throw new ApplicationException("Could not register the account with the provided information.", HttpStatus.INTERNAL_SERVER_ERROR);
-        } finally {
-            // TODO Delete registered data
         }
     }
 

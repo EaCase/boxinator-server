@@ -3,6 +3,7 @@ package com.example.boxinator.dtos.shipment;
 import com.example.boxinator.dtos.box.BoxTierGetDto;
 import com.example.boxinator.dtos.box.BoxTierMapper;
 import com.example.boxinator.errors.exceptions.ApplicationException;
+import com.example.boxinator.models.account.Account;
 import com.example.boxinator.models.box.BoxTier;
 import com.example.boxinator.models.country.Country;
 import com.example.boxinator.models.shipment.Shipment;
@@ -27,23 +28,16 @@ public abstract class ShipmentMapper {
     private BoxTierMapper boxMapper;
 
     @Mapping(source = "boxTier", target = "boxTier", qualifiedByName = "boxToDto")
+    @Mapping(source = "account", target = "accountId", qualifiedByName = "accountToId")
     public abstract ShipmentGetDto toShipmentDto(Shipment shipment);
-
-//    @Mapping(source = "boxTier", target = "boxTier", qualifiedByName = "boxIdsToShipments")
-//    public abstract Shipment toShipment(ShipmentGetDto dto);
 
     @Mapping(source = "boxTierId", target = "boxTier", qualifiedByName = "boxTierIdToBoxTier")
     @Mapping(source = "countryId", target = "country", qualifiedByName = "countryIdToCountry")
     public abstract Shipment toShipment(ShipmentPostDto dto);
 
-    // source = boxTierId?
-    // target = boxTier?
-
-
-
     @Named("boxToDto")
     public BoxTierGetDto boxToDto(BoxTier boxTier) {
-      return boxMapper.toDto(boxTier);
+        return boxMapper.toDto(boxTier);
     }
 
     @Named("boxTierIdToBoxTier")
@@ -62,8 +56,8 @@ public abstract class ShipmentMapper {
         ));
     }
 
-    //  @Named("boxIdsToShipments")
-    // public Set<BoxTier> boxIdsToShipments(Set<Long> ids) {
-    //  return ids.stream().map(it -> boxRepository.findById(it).get()).collect(Collectors.toSet());
-    //  }
+    @Named("accountToId")
+    public Long accountToId(Account acc) {
+        return acc.getId();
+    }
 }

@@ -1,10 +1,8 @@
 package com.example.boxinator.services.shipment;
 
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
-import com.example.boxinator.models.account.Account;
 import com.example.boxinator.models.fee.Fee;
 import com.example.boxinator.models.shipment.Shipment;
-import com.example.boxinator.models.shipment.ShipmentStatus;
 import com.example.boxinator.models.shipment.Status;
 import com.example.boxinator.services.shared.CrudService;
 import org.springframework.stereotype.Service;
@@ -25,4 +23,6 @@ public interface ShipmentService extends CrudService<Shipment, ShipmentPostDto> 
     Shipment updateShipmentStatus(Long id, Status status);
 
     List<Shipment> getShipmentsFiltered(Long accountId, Date from, Date to, List<Status> statuses);
+
+    boolean ownsShipment(Long accountId, Long shipmentId);
 }

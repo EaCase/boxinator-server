@@ -7,6 +7,7 @@ import com.example.boxinator.dtos.account.AccountPostDto;
 import com.example.boxinator.models.account.Account;
 import com.example.boxinator.models.account.AccountType;
 import com.example.boxinator.services.account.AccountService;
+import com.example.boxinator.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,8 +44,7 @@ public class AccountController {
             )}
     )
     public ResponseEntity<AccountGetDto> getAccount(Authentication auth) {
-        var jwt = (Jwt) auth.getPrincipal();
-        Account account = accountService.getByProviderId(jwt.getSubject());
+        Account account = accountService.getById(AuthUtils.getUserId(accountService, auth));
         return buildResponse(auth, account);
     }
 
@@ -55,8 +55,7 @@ public class AccountController {
             content = @Content
     )
     public ResponseEntity<AccountGetDto> updateAccount(Authentication auth, @RequestBody AccountPostDto dto) {
-        var jwt = (Jwt) auth.getPrincipal();
-        Account account = accountService.edit(dto, jwt.getSubject());
+        Account account = accountService.getById(AuthUtils.getUserId(accountService, auth));
         return buildResponse(auth, account);
     }
 
