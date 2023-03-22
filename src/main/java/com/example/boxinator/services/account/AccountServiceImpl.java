@@ -6,6 +6,7 @@ import com.example.boxinator.errors.exceptions.ApplicationException;
 import com.example.boxinator.models.account.Account;
 import com.example.boxinator.repositories.account.AccountRepository;
 import com.example.boxinator.repositories.country.CountryRepository;
+import com.example.boxinator.services.email.EmailService;
 import com.example.boxinator.utils.DateTimeUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -18,10 +19,16 @@ public class AccountServiceImpl implements AccountService {
     private final static String TEMP_ACCOUNT_PREFIX = "TEMP_";
     private final AccountRepository accountRepository;
     private final CountryRepository countryRepository;
+    private final EmailService emailService;
 
-    public AccountServiceImpl(AccountRepository accountRepository, CountryRepository countryRepository) {
+    public AccountServiceImpl(
+            AccountRepository accountRepository,
+            CountryRepository countryRepository,
+            EmailService emailService
+    ) {
         this.accountRepository = accountRepository;
         this.countryRepository = countryRepository;
+        this.emailService = emailService;
     }
 
     @Override
@@ -94,9 +101,11 @@ public class AccountServiceImpl implements AccountService {
         Account acc = new Account();
         // Set a random uuid as the providerId for the account, which can later be used when
         // the account gets fully registered. (+ prefix to clean up these accounts later if needed.)
-        acc.setProviderId(TEMP_ACCOUNT_PREFIX + UUID.randomUUID());
+        var token = UUID.randomUUID();
+        acc.setProviderId(TEMP_ACCOUNT_PREFIX + token);
         acc.setEmail(email);
         accountRepository.save(acc);
+        emailService.sendRegisterAccount(email, token.toString());
         return acc;
     }
 

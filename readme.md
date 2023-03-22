@@ -7,12 +7,23 @@ This repository contains a REST API for the Boxinator application.
 1. Setup keycloak with the instructions from [this](https://github.com/EaCase/keycloak-docker-compose) repository.
 2. Setup Postgres instance.
 3. Create an `application.properties` file into `src/main/resources/` folder, and copy the file below. Replace the
-   postgres properties to match your configuration. No need to touch other config when using keycloak from step 1.
+   postgres, SMTP and client registration url properties. No need to touch other config when using keycloak from step 1.
 
 ```properties
+# Postgres
 spring.datasource.url={postgres_url}
 spring.datasource.username={postgres_username}
 spring.datasource.password={postgres_password}
+# SMTP - If using smtp2go, need to only replace the top 3
+mail.auth.username={username}
+mail.auth.password={password}
+mail.smtp.sender={sender_email}
+mail.smtp.auth=true
+mail.smtp.starttls.enable=true
+mail.smtp.host=mail.smtp2go.com
+mail.smtp.port=2525
+# Client registration url for temporary accounts
+client.url.registration={url}
 # Auth client - Keycloak config - If following Step 1. all this will be correct
 auth.url.login=http://localhost:8083/realms/Boxinator/protocol/openid-connect/token
 auth.url.users=http://localhost:8083/admin/realms/Boxinator/users
