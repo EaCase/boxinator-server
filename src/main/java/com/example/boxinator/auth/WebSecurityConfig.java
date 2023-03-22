@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 
 
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class WebSecurityConfig {
                     .requestMatchers("/v3/api-docs/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/boxes/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shipments/cost/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/shipments/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/settings/countries/**").permitAll()
                     .anyRequest().authenticated();
         });

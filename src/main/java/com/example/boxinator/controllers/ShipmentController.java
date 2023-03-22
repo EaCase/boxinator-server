@@ -153,8 +153,10 @@ public class ShipmentController {
     }
 
 
-    @PostMapping("/")
-    @Operation(summary = "Create a new shipment with the provided values.")
+    @PostMapping
+    @Operation(summary = "Create a new shipment with the provided values. " +
+            "To create a shipment without a registered account, pass in the optional query parameter 'email'. Unregistered email addresses can be used to order shipments " +
+            "until the account has been registered via the link sent to the users email address.")
     @ApiResponse(
             responseCode = "201",
             description = "Returns the created shipment.",
@@ -162,8 +164,14 @@ public class ShipmentController {
                     schema = @Schema(implementation = ShipmentGetDto.class)
             )}
     )
-    public ResponseEntity<ShipmentGetDto> createShipment(@RequestBody ShipmentPostDto body, Authentication auth) {
-        Shipment shipment = shipmentService.createNewShipment(AuthUtils.getUserId(accountService, auth), body);
+    public ResponseEntity<ShipmentGetDto> createShipment(Authentication auth, @RequestBody ShipmentPostDto body, @RequestParam(required = false) String email) {
+        Shipment shipment;
+
+        if (email == null) {
+            if (auth == null) throw new ApplicationException("No auth token provided.", HttpStatus.UNAUTHORIZED);
+            shipment = shipmentService.createNewShipment(AuthUtils.getUserId(accountService, auth), body);
+        } else shipment = shipmentService.orderShipmentWithEmail(email, body);
+
         URI location = URI.create("shipments/" + shipment.getId());
         return ResponseEntity.created(location).body(shipmentMapper.toShipmentDto(shipment));
     }

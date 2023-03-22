@@ -55,7 +55,7 @@ public class AccountController {
             content = @Content
     )
     public ResponseEntity<AccountGetDto> updateAccount(Authentication auth, @RequestBody AccountPostDto dto) {
-        Account account = accountService.getById(AuthUtils.getUserId(accountService, auth));
+        Account account = accountService.edit(dto, ((Jwt) auth.getPrincipal()).getSubject());
         return buildResponse(auth, account);
     }
 
