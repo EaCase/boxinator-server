@@ -31,9 +31,11 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-security"
 
     // JUnit
-
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    // Mail
+    implementation 'com.sun.mail:javax.mail:1.6.2'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.26'
