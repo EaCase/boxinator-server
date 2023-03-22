@@ -133,7 +133,8 @@ class CountryServiceImplTest {
         inputDto.setName("Updated Country");
 
         Country expectedCountry = buildCountry();
-        expectedCountry.setName(inputDto.getName());
+        Mockito.when(expectedCountry.getName()).thenReturn("Updated Country");
+        //expectedCountry.setName(inputDto.getName());
 
         Mockito.when(countryRepository.findById(countryId)).thenReturn(Optional.of(expectedCountry));
         Mockito.when(countryMapper.toCountry(inputDto)).thenReturn(expectedCountry);
@@ -141,7 +142,7 @@ class CountryServiceImplTest {
         Country actualCountry = service.update(countryId, inputDto);
 
         assertEquals(expectedCountry, actualCountry);
-
+        assertEquals("Updated Country", expectedCountry.getName());
         Mockito.verify(countryRepository).save(expectedCountry);
 
 
