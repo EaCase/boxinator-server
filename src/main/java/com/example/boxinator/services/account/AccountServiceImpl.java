@@ -105,7 +105,7 @@ public class AccountServiceImpl implements AccountService {
         acc.setProviderId(TEMP_ACCOUNT_PREFIX + token);
         acc.setEmail(email);
         accountRepository.save(acc);
-        emailService.sendRegisterAccount(email, token.toString());
+        emailService.sendAccountRegistration(email, token.toString());
         return acc;
     }
 

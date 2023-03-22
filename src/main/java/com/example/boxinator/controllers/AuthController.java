@@ -45,6 +45,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody AuthRegister registrationInfo) {
+        // TODO Accept temp token here
         var result = authClient.register(registrationInfo, AccountType.REGISTERED_USER);
         return ResponseEntity.ok().body(result);
     }
