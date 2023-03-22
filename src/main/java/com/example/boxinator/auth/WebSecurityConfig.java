@@ -30,6 +30,8 @@ public class WebSecurityConfig {
                     .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()
                     .requestMatchers("/v3/api-docs/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/boxes/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/shipments/cost/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/settings/countries/**").permitAll()
                     .anyRequest().authenticated();
         });
