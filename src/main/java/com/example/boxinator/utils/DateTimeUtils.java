@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 
-public class DateTimeUtil {
+public class DateTimeUtils {
 
-    private DateTimeUtil() {
+    private DateTimeUtils() {
     }
 
 

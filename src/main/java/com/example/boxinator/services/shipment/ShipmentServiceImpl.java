@@ -68,21 +68,27 @@ public class ShipmentServiceImpl implements ShipmentService {
         // Call repo methods based on the filters
 
 
-
         var allStatuses = Arrays.stream(Status.values()).map(Enum::ordinal).toList();
 
-          if (statuses != null && from != null && to != null) {
+        if (statuses != null && from != null && to != null) {
             // get shipments based on status date from and date to
             return shipmentRepo.findAllByAccountAndDateBetween(accountId, from, to, statuses.stream().map(Enum::ordinal).toList());
-        }
-          else if (from != null && to != null) {
-             // get shipments based on date range only;
-             return shipmentRepo.findAllByAccountAndDateBetween(accountId, from, to, allStatuses);
-         }
-          else {
+        } else if (from != null && to != null) {
+            // get shipments based on date range only;
+            return shipmentRepo.findAllByAccountAndDateBetween(accountId, from, to, allStatuses);
+        } else {
             // get all shipments
             return shipmentRepo.findAllByAccountId(accountId);
         }
+    }
+
+    @Override
+    public boolean ownsShipment(Long accountId, Long shipmentId) {
+        var shipment = shipmentRepo.findById(shipmentId).orElseThrow(() ->
+                new ApplicationException("Shipment with the id " + shipmentId + " does not exist.", HttpStatus.BAD_REQUEST)
+        );
+
+        return shipment.getAccount().getId().equals(accountId);
     }
 
     @Override
@@ -93,19 +99,14 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     public List<Shipment> getAccountShipments(Long id) {
-
-        // ACCOUNTREPOSITORY HAS NATIVE QUERY
-
         return shipmentRepo.findAllByAccountId(id);
     }
 
     @Override
     public List<Shipment> getByStatus(Long accountId, Status status) {
         var res = shipmentRepo.getShipmentsByStatus(accountId, status.ordinal());
-        System.out.println(res);
-        System.out.println(res.size());
+        ;
         return res;
-
     }
 
     @Override
@@ -118,52 +119,40 @@ public class ShipmentServiceImpl implements ShipmentService {
         Shipment ship = shipmentMapper.toShipment(dto);
         ship.setAccount(accountService.getById(accountId));
         ship.setCost(feeService.calculateShipmentCost(dto.getCountryId(), dto.getBoxTierId()).getAmount());
+        ship.setStatuses(List.of(buildStatus(Status.CREATED, ship)));
         shipmentRepo.save(ship);
 
         var status = buildStatus(Status.CREATED, ship);
         shipmentStatusRepository.save(status);
 
-        ship.setStatuses(List.of(buildStatus(Status.CREATED, ship)));
         return ship;
     }
 
     private ShipmentStatus buildStatus(Status status, Shipment shipment) {
         ShipmentStatus shipmentStatus = new ShipmentStatus();
-        shipmentStatus.setTs(new Timestamp(System.currentTimeMillis()));
+        shipmentStatus.setTs(new Date(System.currentTimeMillis()));
         shipmentStatus.setShipment(shipment);
         shipmentStatus.setStatus(status);
         return shipmentStatus;
     }
 
 
-
     @Override
     public List<Shipment> getAll() {
-
         return shipmentRepo.findAll();
-
     }
 
     @Override
     public void deleteById(Long id) {
-
-
-        // TODO Admin only
-
         shipmentRepo.findById(id)
-                .orElseThrow(() -> new ApplicationException("Shipment with this id does not exist.", HttpStatus.NOT_FOUND));
-
-        // Delete all ShipmentStatuses belonging to this shipment id
-        // DELETE FROM statustable WHERE shipment_id = {ID}
-        // shipmentStatusRepository.deletestatuses(shipmentId)
-
+                .orElseThrow(() -> new ApplicationException("Shipment with id" + id + " does not exist.", HttpStatus.BAD_REQUEST));
         shipmentRepo.deleteById(id);
     }
 
     @Override
-    public Shipment updateShipmentStatus(Long id, Status status){
+    public Shipment updateShipmentStatus(Long id, Status status) {
         Shipment shipment = shipmentRepo.findById(id)
-                .orElseThrow(() -> new ApplicationException("No shipment with that id", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ApplicationException("Shipment with id" + id + " does not exist.", HttpStatus.BAD_REQUEST));
 
         var shipmentStatus = buildStatus(status, shipment);
         shipmentStatusRepository.save(shipmentStatus);
@@ -173,39 +162,28 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     public Shipment update(Long id, ShipmentPostDto dto) {
+        Shipment shipment = shipmentRepo.findById(id).orElseThrow(() -> {
+            throw new ApplicationException("Shipment with id " + id + " does not exist.", HttpStatus.BAD_REQUEST);
+        });
 
-        Optional <Shipment> optionalShipment = shipmentRepo.findById(id);
-
-
-        if(optionalShipment.isEmpty()) {
-            throw new ApplicationException("Could not update shipment with that id", HttpStatus.NOT_FOUND);
-        }
-
-        Shipment shipment = optionalShipment.get();
-
-        if(dto.getRecipient() != null) {
+        if (dto.getRecipient() != null) {
             shipment.setRecipient(dto.getRecipient());
         }
-        if(dto.getBoxColor() != null) {
+
+        if (dto.getBoxColor() != null) {
             shipment.setBoxColor(dto.getBoxColor());
         }
 
-        if(dto.getBoxTierId() !=null) {
+        if (dto.getBoxTierId() != null) {
             var boxTier = boxService.getById(dto.getBoxTierId());
             shipment.setBoxTier(boxTier);
         }
 
-        if(dto.getCountryId() != null) {
+        if (dto.getCountryId() != null) {
             var countryId = countryService.getById(dto.getCountryId());
             shipment.setCountry(countryId);
         }
 
-        // Add more update methods if needed
-
-
-
         return shipmentRepo.save(shipment);
-
-
     }
 }

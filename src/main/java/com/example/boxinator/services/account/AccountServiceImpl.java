@@ -6,7 +6,7 @@ import com.example.boxinator.errors.exceptions.ApplicationException;
 import com.example.boxinator.models.account.Account;
 import com.example.boxinator.repositories.account.AccountRepository;
 import com.example.boxinator.repositories.country.CountryRepository;
-import com.example.boxinator.utils.DateTimeUtil;
+import com.example.boxinator.utils.DateTimeUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,12 +25,12 @@ public class AccountServiceImpl implements AccountService {
     public Account register(AuthRegister info, String providerId) {
         Account acc = new Account();
         acc.setProviderId(providerId);
-        acc.setDob(DateTimeUtil.fromString(info.getDateOfBirth()));
+        acc.setDob(DateTimeUtils.fromString(info.getDateOfBirth()));
         acc.setEmail(info.getEmail());
         acc.setFirstName(info.getFirstName());
         acc.setLastName(info.getLastName());
         acc.setContactNumber(info.getContactNumber());
-        acc.setCreatedAt(DateTimeUtil.now());
+        acc.setCreatedAt(DateTimeUtils.now());
         acc.setZipCode(info.getZipCode());
         acc.setCountry(countryRepository.findById(Long.valueOf(info.getCountryId())).orElseThrow(() ->
                 new ApplicationException("Invalid country id provided.", HttpStatus.BAD_REQUEST)));
@@ -43,7 +43,7 @@ public class AccountServiceImpl implements AccountService {
         var acc = accountRepository.findAccountByProviderId(providerId).orElseThrow(() ->
                 new ApplicationException("Could not find the account.", HttpStatus.INTERNAL_SERVER_ERROR)
         );
-        acc.setDob(DateTimeUtil.fromString(dto.getDateOfBirth()));
+        acc.setDob(DateTimeUtils.fromString(dto.getDateOfBirth()));
         acc.setFirstName(dto.getFirstName());
         acc.setLastName(dto.getLastName());
         acc.setZipCode(dto.getZipCode());
