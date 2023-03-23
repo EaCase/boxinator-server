@@ -74,6 +74,14 @@ public class KeyCloakAuthClient implements AuthClient {
         AuthResponse serviceAccount = authAsServiceAccount();
         String serviceAccountToken = serviceAccount.getAccessToken();
 
+        // Sanity check, if token is provided, the email needs to match the one in db under the token value
+        if (registrationInfo.getRegistrationToken() != null) {
+            var ok = accountService.emailMatchesToken(registrationInfo.getEmail(), registrationInfo.getRegistrationToken());
+            if (!ok) {
+                throw new ApplicationException("The provided email needs to match the email for the token.", HttpStatus.BAD_REQUEST);
+            }
+        }
+
         try {
             var res = new RestTemplate().exchange(
                     URL_USERS,

@@ -1,5 +1,6 @@
 package com.example.boxinator.dtos.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -12,5 +13,10 @@ public class AuthRegister {
     private String zipCode;
     private String contactNumber;
     private Long countryId;
+
+    @JsonIgnore
+    // In case the email is already used for temporary account, pass the server generated token with registration data to link the
+    // existing orders.
+    private String registrationToken;
 }
 
