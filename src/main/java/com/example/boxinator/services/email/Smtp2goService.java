@@ -38,17 +38,20 @@ public class Smtp2goService implements EmailService {
     private String URL_FINISH_REG_BASE;
 
     @Override
-    public void sendRegisterAccount(String email, String temporaryUserToken) {
+    public void sendAccountRegistration(String email, String temporaryUserToken) {
         try {
             Message message = new MimeMessage(getSession());
+            message.setFrom(new InternetAddress(MAIL_SENDER));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+            message.setSubject("Register your account.");
+
             Multipart mp = new MimeMultipart("alternative");
             BodyPart text = new MimeBodyPart();
             text.setText("Click the following link to finish registering your account: " + URL_FINISH_REG_BASE + "?token=" + temporaryUserToken);
             mp.addBodyPart(text);
-            message.setFrom(new InternetAddress(MAIL_SENDER));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-            message.setSubject("Register your account.");
+
             message.setContent(mp);
+
             Transport.send(message);
         } catch (javax.mail.MessagingException e) {
             throw new RuntimeException("Failed to send mail.");

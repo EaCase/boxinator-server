@@ -33,19 +33,39 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account register(AuthRegister info, String providerId) {
-        Account acc = new Account();
-        acc.setProviderId(providerId);
-        acc.setDob(DateTimeUtils.fromString(info.getDateOfBirth()));
+        if (info.getRegistrationToken() != null) {
+            return completeTemporaryAccountRegistration(info, providerId);
+        }
+        Account acc = populateAccountFields(new Account(), info);
         acc.setEmail(info.getEmail());
+        acc.setProviderId(providerId);
+        acc.setCreatedAt(DateTimeUtils.now());
+        return accountRepository.save(acc);
+    }
+
+    private Account completeTemporaryAccountRegistration(AuthRegister info, String providerId) {
+        var temp = accountRepository.findAccountByProviderId(TEMP_ACCOUNT_PREFIX + info.getRegistrationToken()).orElseThrow(() ->
+                new ApplicationException("Invalid registration token provided.", HttpStatus.BAD_REQUEST)
+        );
+        var acc = populateAccountFields(temp, info);
+        acc.setProviderId(providerId);
+        return accountRepository.save(acc);
+    }
+
+    // Sets all but email/ids/timestamp
+    private Account populateAccountFields(Account acc, AuthRegister info) {
+        if (info.getDateOfBirth() != null) {
+            acc.setDob(DateTimeUtils.fromString(info.getDateOfBirth()));
+        }
+        if (info.getCountryId() != null) {
+            acc.setCountry(countryRepository.findById(Long.valueOf(info.getCountryId())).orElseThrow(() ->
+                    new ApplicationException("Invalid country id provided.", HttpStatus.BAD_REQUEST)));
+        }
         acc.setFirstName(info.getFirstName());
         acc.setLastName(info.getLastName());
         acc.setContactNumber(info.getContactNumber());
-        acc.setCreatedAt(DateTimeUtils.now());
         acc.setZipCode(info.getZipCode());
-        acc.setCountry(countryRepository.findById(Long.valueOf(info.getCountryId())).orElseThrow(() ->
-                new ApplicationException("Invalid country id provided.", HttpStatus.BAD_REQUEST)));
-
-        return accountRepository.save(acc);
+        return acc;
     }
 
     @Override
@@ -104,8 +124,9 @@ public class AccountServiceImpl implements AccountService {
         var token = UUID.randomUUID();
         acc.setProviderId(TEMP_ACCOUNT_PREFIX + token);
         acc.setEmail(email);
+        acc.setCreatedAt(DateTimeUtils.now());
         accountRepository.save(acc);
-        emailService.sendRegisterAccount(email, token.toString());
+        emailService.sendAccountRegistration(email, token.toString());
         return acc;
     }
 
@@ -130,5 +151,13 @@ public class AccountServiceImpl implements AccountService {
     public void deleteByProviderId(String id) {
         System.out.println("Service delete " + id);
         accountRepository.deleteAccountByProviderId(id);
+    }
+
+    @Override
+    public boolean emailMatchesToken(String email, String registrationToken) {
+        var acc = accountRepository.findAccountByProviderId(TEMP_ACCOUNT_PREFIX + registrationToken).orElseThrow(() ->
+                new ApplicationException("Invalid registration token.", HttpStatus.BAD_REQUEST)
+        );
+        return acc.getEmail().equals(email);
     }
 }

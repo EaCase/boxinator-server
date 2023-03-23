@@ -14,8 +14,13 @@ public interface AccountService {
      */
     Account registerTempAccount(String email);
 
+    /**
+     * Register a new account. If registrationToken is provided with the info object, replaces the matching temp
+     * account in the database.
+     *
+     * @return Account
+     */
     Account register(AuthRegister info, String providerId);
-
 
     Account getById(Long id);
 
@@ -36,6 +41,8 @@ public interface AccountService {
 
 
     void deleteByProviderId(String id);
+
+    boolean emailMatchesToken(String email, String registrationToken);
 
     /**
      * Enum to indicate the registration status of an account internally.
