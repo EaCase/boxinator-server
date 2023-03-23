@@ -234,17 +234,6 @@ class ShipmentServiceImplTest {
         Mockito.verify(shipmentRepository, Mockito.times(1)).findById(accountId);
     }
 
-    @Test
-    void getAccountShipments() {
-
-    }
-
-
-    @Test
-    void calculateShipmentCost() {
-    }
-
-
 
     @Test
     void getAll() {
@@ -274,7 +263,7 @@ class ShipmentServiceImplTest {
     private ShipmentStatus buildStatus(Status status, Shipment shipment) {
         ShipmentStatus shipmentStatus = new ShipmentStatus();
         shipmentStatus.setStatus(status);
-        shipmentStatus.setTs(Mockito.any(Timestamp.class));
+        shipmentStatus.setTs(new Date());
         shipmentStatus.setShipment(shipment);
         return shipmentStatus;
     }
@@ -286,31 +275,17 @@ class ShipmentServiceImplTest {
         Shipment shipment = buildShipment();
         Mockito.when(shipmentRepository.findById(shipmentId)).thenReturn(Optional.of(shipment));
 
+
+        Mockito.when(shipmentStatusRepository.save(any())).thenAnswer(it -> it.getArgument(0));
+
         Shipment result = service.updateShipmentStatus(shipmentId, status);
 
         assertEquals(result,shipment);
         Mockito.verify(shipmentRepository).findById(shipmentId);
 
+
         ShipmentStatus expectedShipmentStatus = buildStatus(status, shipment);
-        Mockito.verify(shipmentStatusRepository).save(expectedShipmentStatus);
-//
-//        Shipment shipment = buildShipment();
-//
-//        ShipmentStatus shipmentStatus = buildStatus(Status.COMPLETED);
-//        Mockito.when(shipmentStatus.getStatus()).thenReturn(Status.COMPLETED);
-//
-//
-//        Mockito.when(shipmentRepository.findById(shipment.getId())).thenReturn(Optional.of(shipment));
-//
-//        Mockito.when(shipmentStatusRepository.save(shipmentStatus)).thenReturn(shipmentStatus);
-//
-//        Shipment updateShipment = service.updateShipmentStatus(shipment.getId(), shipmentStatus.getStatus());
-//
-//        Mockito.verify(shipmentRepository).findById(shipment.getId());
-//
-//        Mockito.verify(shipmentStatusRepository).save(shipmentStatus);
-//
-//        assertEquals(shipmentStatus, updateShipment);
+        Mockito.verify(shipmentStatusRepository, Mockito.times(1)).save(any());
 
     }
 
