@@ -6,7 +6,6 @@ import com.example.boxinator.dtos.shipment.ShipmentGetDto;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.errors.exceptions.ApplicationException;
-import com.example.boxinator.models.account.Account;
 import com.example.boxinator.models.shipment.Shipment;
 import com.example.boxinator.models.shipment.Status;
 import com.example.boxinator.repositories.shipment.ShipmentRepository;
@@ -169,7 +168,7 @@ public class ShipmentController {
 
         if (email == null) {
             if (auth == null) throw new ApplicationException("No auth token provided.", HttpStatus.UNAUTHORIZED);
-            shipment = shipmentService.createNewShipment(AuthUtils.getUserId(accountService, auth), body);
+            shipment = shipmentService.orderShipmentWithAccountId(AuthUtils.getUserId(accountService, auth), body);
         } else shipment = shipmentService.orderShipmentWithEmail(email, body);
 
         URI location = URI.create("shipments/" + shipment.getId());

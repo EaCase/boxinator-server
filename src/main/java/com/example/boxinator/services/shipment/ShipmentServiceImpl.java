@@ -99,7 +99,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     @Override
-    public Shipment createNewShipment(Long accountId, ShipmentPostDto dto) {
+    public Shipment orderShipmentWithAccountId(Long accountId, ShipmentPostDto dto) {
         Shipment shipment = buildShipment(accountId, dto);
         ShipmentStatus status = buildStatus(Status.CREATED, shipment);
 
@@ -135,7 +135,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                     throw new ApplicationException("Registered users can't order shipments without logging in.", HttpStatus.BAD_REQUEST);
         };
 
-        return this.createNewShipment(temporaryAccount.getId(), dto);
+        return this.orderShipmentWithAccountId(temporaryAccount.getId(), dto);
     }
 
     @Override

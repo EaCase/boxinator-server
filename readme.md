@@ -2,6 +2,13 @@
 
 This repository contains a REST API for the Boxinator application.
 
+## Overview
+
+#### Accounts
+
+There are three types of accounts. 'Admin' - All actions available, 'Basic' - Limited functionality, 'Guest' - Allowed
+to create shipments and upgrade the account to 'Basic' via a link provided in the email.
+
 ### Running locally
 
 1. Setup keycloak with the instructions from [this](https://github.com/EaCase/keycloak-docker-compose) repository.
