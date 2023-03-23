@@ -18,7 +18,7 @@ public interface ShipmentService extends CrudService<Shipment, ShipmentPostDto> 
 
     Fee calculateShipmentCost(Long countryId, Long boxTierId);
 
-    Shipment createNewShipment(Long accountId, ShipmentPostDto dto);
+    Shipment orderShipmentWithAccountId(Long accountId, ShipmentPostDto dto);
 
     /**
      * Creates a new order with only the provided email address. The email address
