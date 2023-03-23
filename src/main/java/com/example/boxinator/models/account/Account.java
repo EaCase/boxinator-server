@@ -5,11 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
-/**
- * TODO Provider stuff?
- */
+
 @Entity
 @Getter
 @Setter
@@ -19,9 +17,10 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(unique = true, nullable = false)
     private String providerId;
 
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(name = "first_name")
@@ -31,13 +30,12 @@ public class Account {
     private String lastName;
 
     @Column(name = "created_at")
-    private Date createdAt;
+    private LocalDate createdAt;
 
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "account_type", nullable = false)
-    private AccountType type;
+    private LocalDate dob;
 
-    private Date dob;
+    @Transient
+    private AccountType accountType;
 
     @ManyToOne
     @JoinColumn(name = "country_id")

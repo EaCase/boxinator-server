@@ -1,6 +1,7 @@
 package com.example.boxinator.dtos.auth;
 
 
+import com.example.boxinator.models.account.AccountType;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,5 +32,5 @@ public class AuthResponse {
 
     String scope;
 
-    String accountType;
+    AccountType accountType;
 }

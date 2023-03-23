@@ -8,21 +8,21 @@ import java.util.Optional;
 public enum AccountType {
     GUEST, REGISTERED_USER, ADMIN;
 
-    public static Optional<AccountType> getAccountType(Collection<GrantedAuthority> collection) {
+    public static AccountType getAccountType(Collection<? extends GrantedAuthority> collection) {
         for (GrantedAuthority auth : collection) {
             switch (auth.getAuthority()) {
-                case "ROLE_user" -> {
-                    return Optional.of(AccountType.REGISTERED_USER);
-                }
                 case "ROLE_admin" -> {
-                    return Optional.of(AccountType.ADMIN);
+                    return AccountType.ADMIN;
+                }
+                case "ROLE_user" -> {
+                    return AccountType.REGISTERED_USER;
                 }
                 default -> {
                     // Not account type claim
                 }
             }
         }
-        return Optional.empty();
+        return AccountType.GUEST;
     }
 
     public static String asString(AccountType accountType) {

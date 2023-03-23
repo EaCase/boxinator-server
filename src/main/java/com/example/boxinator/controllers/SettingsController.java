@@ -10,13 +10,13 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping(path = "settings")
 public class SettingsController {
@@ -73,10 +73,11 @@ public class SettingsController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a country")
     @ApiResponse(responseCode = "200",
-        description = "Succesfully deleted a country",
-        content = {@Content(mediaType = "application/json",
-            schema = @Schema(implementation = Long.class))})
-    public ResponseEntity<Long> delete(@PathVariable long id){
+            description = "Succesfully deleted a country",
+            content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Long.class))})
+    @PreAuthorize("hasRole('ROLE_admin')")
+    public ResponseEntity<Long> delete(@PathVariable long id) {
         countryService.deleteById(id);
         return ResponseEntity.ok().body(id);
     }

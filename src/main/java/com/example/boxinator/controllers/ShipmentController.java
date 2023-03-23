@@ -5,17 +5,23 @@ import com.example.boxinator.dtos.fee.FeeMapper;
 import com.example.boxinator.dtos.shipment.ShipmentGetDto;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
+import com.example.boxinator.errors.exceptions.ApplicationException;
+import com.example.boxinator.models.account.Account;
 import com.example.boxinator.models.shipment.Shipment;
-import com.example.boxinator.models.shipment.ShipmentStatus;
 import com.example.boxinator.models.shipment.Status;
 import com.example.boxinator.repositories.shipment.ShipmentRepository;
+import com.example.boxinator.services.account.AccountService;
 import com.example.boxinator.services.shipment.ShipmentService;
 import com.example.boxinator.services.shipment.ShipmentServiceImpl;
+import com.example.boxinator.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -23,25 +29,30 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+@CrossOrigin
 @RestController
 @RequestMapping(value = "shipments")
 public class ShipmentController {
     private final ShipmentService shipmentService;
     private final FeeMapper feeMapper;
-
+    private final AccountService accountService;
     private final ShipmentMapper shipmentMapper;
-
     private final ShipmentRepository shipmentRepository;
 
-    public ShipmentController(ShipmentServiceImpl service, FeeMapper feeMapper, ShipmentMapper shipmentMapper, ShipmentRepository shipmentRepository) {
+    public ShipmentController(
+            ShipmentServiceImpl service,
+            FeeMapper feeMapper,
+            AccountService accountService,
+            ShipmentMapper shipmentMapper,
+            ShipmentRepository shipmentRepository
+    ) {
         this.shipmentService = service;
         this.feeMapper = feeMapper;
+        this.accountService = accountService;
         this.shipmentMapper = shipmentMapper;
         this.shipmentRepository = shipmentRepository;
     }
@@ -57,32 +68,12 @@ public class ShipmentController {
             )}
     )
     public ResponseEntity<List<ShipmentGetDto>> getAllShipments(
+            Authentication auth,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to,
-            @RequestParam(required = false) String status,
-            @RequestParam Long accountId
+            @RequestParam(required = false) String status
     ) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate localDate = LocalDate.parse(from, formatter);
-        Instant instant = localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
-        Date startDate = Date.from(instant);
-
-        LocalDate localDateTo = LocalDate.parse(to, formatter);
-        Instant instantTo = localDateTo.atTime(23, 59, 59).toInstant(ZoneOffset.UTC);
-        Date endDate = Date.from(instantTo);
-
-        List<Status> statusEnum = null;
-
-        if(status != null) {
-            statusEnum=List.of(Status.fromString(status));
-        }
-
-
-        var shipments = shipmentService.getShipmentsFiltered(accountId, startDate, endDate, statusEnum);
-        var shipmentDTOs = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
-
-        return ResponseEntity.ok().body(shipmentDTOs);
-        /*
+    /*
         Retrieve a list of shipments relevant to the authenticated user.
         A user will see only their shipments.
 
@@ -92,7 +83,30 @@ public class ShipmentController {
         This can also optionally be filterable by status type or using a date range (from - to).
 
         This could be done using query strings to provide these filters
-         */
+     */
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        List<Status> statusEnum = null;
+        Date startDate = null;
+        Date endDate = null;
+
+        if (from != null) {
+            LocalDate localDate = LocalDate.parse(from, formatter);
+            Instant instant = localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+            startDate = Date.from(instant);
+        }
+        if (to != null) {
+            LocalDate localDateTo = LocalDate.parse(to, formatter);
+            Instant instantTo = localDateTo.atTime(23, 59, 59).toInstant(ZoneOffset.UTC);
+            endDate = Date.from(instantTo);
+        }
+        if (status != null) {
+            statusEnum = List.of(Status.fromString(status));
+        }
+
+        var shipments = shipmentService.getShipmentsFiltered(AuthUtils.getUserId(accountService, auth), startDate, endDate, statusEnum);
+        var shipmentDTOs = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
+        return ResponseEntity.ok().body(shipmentDTOs);
     }
 
     @GetMapping("/complete")
@@ -105,12 +119,9 @@ public class ShipmentController {
                             array = @ArraySchema(schema = @Schema(implementation = ShipmentGetDto.class))
                     )}
     )
-    public ResponseEntity<List<ShipmentGetDto>> getCompletedShipments() {
-        List<Shipment> shipments = shipmentService.getByStatus(1L, Status.COMPLETED);
-        List<ShipmentGetDto> shipmentDtos = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
-
-        return ResponseEntity.ok().body(shipmentDtos);
-
+    public ResponseEntity<List<ShipmentGetDto>> getCompletedShipments(Authentication auth) {
+        List<Shipment> shipments = shipmentService.getByStatus(AuthUtils.getUserId(accountService, auth), Status.COMPLETED);
+        return ResponseEntity.ok().body(shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList()));
     }
 
     @GetMapping("/cancelled")
@@ -123,14 +134,9 @@ public class ShipmentController {
                             array = @ArraySchema(schema = @Schema(implementation = ShipmentGetDto.class))
                     )}
     )
-    public ResponseEntity<List<ShipmentGetDto>> getCancelledShipments() {
-
-        List<Shipment> shipments = shipmentService.getByStatus(1L, Status.CANCELLED);
-        List<ShipmentGetDto> shipmentDtos = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
-        return ResponseEntity.ok().body(shipmentDtos);
-
-        //throw new RuntimeException("Not implemented.");
-
+    public ResponseEntity<List<ShipmentGetDto>> getCancelledShipments(Authentication auth) {
+        List<Shipment> shipments = shipmentService.getByStatus(AuthUtils.getUserId(accountService, auth), Status.CANCELLED);
+        return ResponseEntity.ok().body(shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList()));
     }
 
     @GetMapping("/cost")
@@ -147,8 +153,10 @@ public class ShipmentController {
     }
 
 
-    @PostMapping("/")
-    @Operation(summary = "Create a new shipment with the provided values.")
+    @PostMapping
+    @Operation(summary = "Create a new shipment with the provided values. " +
+            "To create a shipment without a registered account, pass in the optional query parameter 'email'. Unregistered email addresses can be used to order shipments " +
+            "until the account has been registered via the link sent to the users email address.")
     @ApiResponse(
             responseCode = "201",
             description = "Returns the created shipment.",
@@ -156,15 +164,14 @@ public class ShipmentController {
                     schema = @Schema(implementation = ShipmentGetDto.class)
             )}
     )
-    public ResponseEntity<ShipmentGetDto> createShipment(@RequestBody ShipmentPostDto body) {
-        /*
-        Used to create a new shipment, the client data must be retrieved based on the authorization
-         transmitted in the request header.
+    public ResponseEntity<ShipmentGetDto> createShipment(Authentication auth, @RequestBody ShipmentPostDto body, @RequestParam(required = false) String email) {
+        Shipment shipment;
 
-        Administrators can also create shipments.
+        if (email == null) {
+            if (auth == null) throw new ApplicationException("No auth token provided.", HttpStatus.UNAUTHORIZED);
+            shipment = shipmentService.createNewShipment(AuthUtils.getUserId(accountService, auth), body);
+        } else shipment = shipmentService.orderShipmentWithEmail(email, body);
 
-         */
-        Shipment shipment = shipmentService.createNewShipment(1L, body);
         URI location = URI.create("shipments/" + shipment.getId());
         return ResponseEntity.created(location).body(shipmentMapper.toShipmentDto(shipment));
     }
@@ -178,15 +185,16 @@ public class ShipmentController {
                     schema = @Schema(implementation = ShipmentGetDto.class)
             )}
     )
-    public ResponseEntity<ShipmentGetDto> getShipmentById(@PathVariable Long id) {
+    public ResponseEntity<ShipmentGetDto> getShipmentById(Authentication auth, @PathVariable Long id) {
+        var isAdmin = AuthUtils.isAdmin(auth);
+        var ownsShipment = shipmentService.ownsShipment(AuthUtils.getUserId(accountService, auth), id);
 
+        if (isAdmin || ownsShipment) {
+            ShipmentGetDto dto = shipmentMapper.toShipmentDto(shipmentService.getById(id));
+            return ResponseEntity.ok().body(dto);
+        }
 
-        return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipmentService.getById(id)));
-        /*
-        Retrieve the details of a single shipment, remember to consider if the current user has
-        access the requested shipment. (Users can only view their own shipment)
-     */
-
+        throw new ApplicationException("You are not authorized to get this shipment's data.", HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/customer/{customerId}")
@@ -198,10 +206,20 @@ public class ShipmentController {
                     array = @ArraySchema(schema = @Schema(implementation = ShipmentGetDto.class))
             )}
     )
-    public ResponseEntity<List<ShipmentGetDto>> getAllCustomerShipments(@PathVariable Long customerId) {
-        // Non admin users only get their own shipments
-        List<ShipmentGetDto> shipments = shipmentService.getAccountShipments(customerId).stream().map(shipmentMapper::toShipmentDto).toList();
-        return ResponseEntity.ok().body(shipments);
+    public ResponseEntity<List<ShipmentGetDto>> getAllCustomerShipments(Authentication auth, @PathVariable Long customerId) {
+        var isAdmin = AuthUtils.isAdmin(auth);
+        var isCustomer = AuthUtils.getUserId(accountService, auth).equals(customerId);
+
+        if (isCustomer || isAdmin) {
+            List<ShipmentGetDto> shipments = shipmentService
+                    .getAccountShipments(customerId)
+                    .stream()
+                    .map(shipmentMapper::toShipmentDto)
+                    .toList();
+            return ResponseEntity.ok().body(shipments);
+        }
+
+        throw new ApplicationException("You are not authorized to get the shipments for customer " + customerId + ".", HttpStatus.UNAUTHORIZED);
     }
 
     @PutMapping("/{id}")
@@ -213,7 +231,7 @@ public class ShipmentController {
                     schema = @Schema(implementation = ShipmentGetDto.class)
             )}
     )
-    public ResponseEntity<ShipmentGetDto> updateShipmentStatus(@PathVariable Long id, @RequestBody String status) {
+    public ResponseEntity<ShipmentGetDto> updateShipmentStatus(Authentication auth, @PathVariable Long id, @RequestBody String status) {
         /*
         This endpoint is used to update a shipment, but any non-Administrator users may
         only cancel a shipment. Meaning, only admins can change shipment statuses aside from
@@ -223,10 +241,24 @@ public class ShipmentController {
         will use this to mark a shipment as completed.
          */
         Status statusEnum = Status.fromString(status);
+        var isAdmin = AuthUtils.isAdmin(auth);
 
-        var shipment = shipmentService.updateShipmentStatus(id, statusEnum);
+        if (isAdmin) {
+            var shipment = shipmentService.updateShipmentStatus(id, statusEnum);
+            return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipment));
+        }
 
-        return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipment));
+        if (statusEnum != Status.CANCELLED) {
+            throw new ApplicationException("You are only allowed to cancel shipments.", HttpStatus.UNAUTHORIZED);
+        }
+
+        var ownsShipment = shipmentService.ownsShipment(AuthUtils.getUserId(accountService, auth), id);
+        if (ownsShipment) {
+            var shipment = shipmentService.updateShipmentStatus(id, statusEnum);
+            return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipment));
+        }
+
+        throw new ApplicationException("You are not authorized to edit the status of this shipment.", HttpStatus.UNAUTHORIZED);
     }
 
 
@@ -239,19 +271,15 @@ public class ShipmentController {
                     schema = @Schema(implementation = ShipmentGetDto.class)
             )}
     )
-    public ResponseEntity<ShipmentGetDto> updateShipment(@PathVariable Long id, @RequestBody ShipmentPostDto shipmentPost) {
+    public ResponseEntity<ShipmentGetDto> updateShipment(Authentication auth, @PathVariable Long id, @RequestBody ShipmentPostDto shipmentPost) {
+        var isAdmin = AuthUtils.isAdmin(auth);
+        var ownsShipment = shipmentService.ownsShipment(AuthUtils.getUserId(accountService, auth), id);
 
-        //   ShipmentPostDto postDto = shipmentMapper.toShipment(shipmentPost);
+        if (isAdmin || ownsShipment) {
+            return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipmentService.update(id, shipmentPost)));
+        }
 
-        //   Shipment updateShipment = shipmentService.update(id, postDto);
-
-        //   ShipmentGetDto getDto = shipmentMapper.toShipmentDto(updateShipment);
-
-        return ResponseEntity.ok().body(shipmentMapper.toShipmentDto(shipmentService.update(id, shipmentPost)));
-
-        // return ResponseEntity.ok(getDto);
-
-
+        throw new ApplicationException("You are not authorized to edit this shipment.", HttpStatus.UNAUTHORIZED);
     }
 
 
@@ -263,11 +291,9 @@ public class ShipmentController {
                     schema = @Schema(implementation = Long.class)
             )}
     )
+    @PreAuthorize("hasRole('ROLE_admin')")
     public ResponseEntity<Long> deleteShipping(@PathVariable Long id) {
-        // TODO Admin only
-
         shipmentService.deleteById(id);
         return ResponseEntity.ok().body(id);
-
     }
 }
