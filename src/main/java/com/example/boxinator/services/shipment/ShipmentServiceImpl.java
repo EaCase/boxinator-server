@@ -13,6 +13,7 @@ import com.example.boxinator.repositories.shipment.ShipmentStatusRepository;
 import com.example.boxinator.services.account.AccountService;
 import com.example.boxinator.services.box.BoxService;
 import com.example.boxinator.services.country.CountryService;
+import com.example.boxinator.services.email.EmailService;
 import com.example.boxinator.services.fee.FeeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final BoxService boxService;
     private final AccountService accountService;
     private final ShipmentMapper shipmentMapper;
+    private final EmailService emailService;
 
     public ShipmentServiceImpl(
             FeeService feeService,
@@ -37,8 +39,8 @@ public class ShipmentServiceImpl implements ShipmentService {
             ShipmentStatusRepository shipmentStatusRepository, ShipmentMapper shipmentMapper,
             CountryService countryService,
             AccountService accountService,
-            BoxService boxService
-    ) {
+            BoxService boxService,
+            EmailService emailService) {
         this.feeService = feeService;
         this.shipmentRepository = shipmentRepository;
         this.shipmentMapper = shipmentMapper;
@@ -46,6 +48,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         this.accountService = accountService;
         this.boxService = boxService;
         this.shipmentStatusRepository = shipmentStatusRepository;
+        this.emailService = emailService;
     }
 
     @Override
@@ -105,6 +108,8 @@ public class ShipmentServiceImpl implements ShipmentService {
 
         shipmentRepository.save(shipment);
         shipmentStatusRepository.save(status);
+
+        emailService.sendOrderConfirmation(accountService.getById(accountId).getEmail(),shipment.getId());
 
         return shipment;
     }

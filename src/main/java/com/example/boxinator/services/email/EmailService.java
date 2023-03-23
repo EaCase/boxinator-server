@@ -12,5 +12,5 @@ public interface EmailService {
     /**
      * Sends an email confirmation message of an order.
      */
-    void sendOrderConfirmation(String email, Long orderId);
+    void sendOrderConfirmation(String email, Long shipmentId);
 }

@@ -1,7 +1,9 @@
 package com.example.boxinator.services.email;
 
 import com.example.boxinator.errors.exceptions.ApplicationException;
+import com.example.boxinator.repositories.shipment.ShipmentRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -13,6 +15,17 @@ import java.util.Properties;
 
 @Service
 public class Smtp2goService implements EmailService {
+
+    private ShipmentRepository shipmentRepository;
+
+
+     public Smtp2goService(
+             ShipmentRepository shipmentRepository
+     ) {
+         this.shipmentRepository = shipmentRepository;
+     }
+
+
     @Value("${mail.auth.username}")
     private String USERNAME;
 
@@ -37,6 +50,9 @@ public class Smtp2goService implements EmailService {
     @Value("${client.url.registration}")
     private String URL_FINISH_REG_BASE;
 
+
+
+
     @Override
     public void sendRegisterAccount(String email, String temporaryUserToken) {
         try {
@@ -51,13 +67,40 @@ public class Smtp2goService implements EmailService {
             message.setContent(mp);
             Transport.send(message);
         } catch (javax.mail.MessagingException e) {
+            e.printStackTrace();
             throw new RuntimeException("Failed to send mail.");
         }
     }
 
     @Override
-    public void sendOrderConfirmation(String email, Long orderId) {
+    public void sendOrderConfirmation(String email, Long shipmentId) {
 
+       var shipment = shipmentRepository.findById(shipmentId).orElseThrow(() -> new ApplicationException("No shipment with that id", HttpStatus.BAD_REQUEST));
+
+       try{
+            Message message = new MimeMessage(getSession());
+            Multipart mp = new MimeMultipart("alternative");
+           BodyPart htmlmessage = new MimeBodyPart();
+           htmlmessage.setContent(
+                   "<h1>Hello! Thank you for placing your shipment</h1>" + "<br>" +
+                           "<p><b>Order successfully placed! with order id: </b></p>" + shipmentId + "<br>" +
+                           "<p><b>Shipment placed for item: </b></p>" + shipment.getBoxTier().getName() + " mystery box" + "<br>" +
+                           "<p><b>Box colour: </b></p>" + shipment.getBoxColor() + "<br>" +
+                           "<p><b>Box weight: <b></p>" + shipment.getBoxTier().getWeight() + "kg" + "<br>" +
+                           "<p><b>Box being shipped to: </b><p>" + shipment.getCountry().getName() + "<br>" +
+                           "<p><b>Total cost of order: </b></p>" + shipment.getCost() + "&#8364;"
+                   , "text/html");
+            mp.addBodyPart(htmlmessage);
+            message.setFrom(new InternetAddress(MAIL_SENDER));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+            message.setSubject("Order confirmation");
+            message.setContent(mp);
+            Transport.send(message);
+
+        } catch (javax.mail.MessagingException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to send confirmation email");
+        }
     }
 
     private Session getSession() {
