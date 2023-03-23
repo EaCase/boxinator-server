@@ -64,11 +64,10 @@ class ShipmentServiceImplTest {
                 shipmentMapper,
                 countryService,
                 accountService,
-                boxService
+                boxService,
 
 
-
-        );
+                emailService);
     }
 
      private Shipment buildShipmentTest() {
