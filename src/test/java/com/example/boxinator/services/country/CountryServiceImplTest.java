@@ -1,17 +1,13 @@
 package com.example.boxinator.services.country;
 
-import com.example.boxinator.dtos.country.CountryGetDto;
 import com.example.boxinator.dtos.country.CountryMapper;
-import com.example.boxinator.dtos.country.CountryMapperImpl;
 import com.example.boxinator.dtos.country.CountryPostDto;
 import com.example.boxinator.models.country.Country;
 import com.example.boxinator.models.country.CountryTier;
 import com.example.boxinator.repositories.country.CountryRepository;
 import com.example.boxinator.repositories.country.CountryTierRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -62,7 +58,7 @@ class CountryServiceImplTest {
         return country;
     }
     @Test
-    void create() {
+    void createCountryTest() {
 
         CountryPostDto countryPostDto = new CountryPostDto();
         //Mockito.when(countryPostDto.getName()).thenReturn("Test Country");
@@ -92,8 +88,7 @@ class CountryServiceImplTest {
     }
 
     @Test
-    void getAll() {
-
+    void getAllCountriesTest() {
 
         List<Country> expectedCountries =  new ArrayList<>();
         expectedCountries.add(buildCountry());
@@ -109,7 +104,7 @@ class CountryServiceImplTest {
     }
 
     @Test
-    void deleteById() {
+    void deleteCountriesByIdTest() {
 
         long countryId = 1L;
         Country expectedCountry = buildCountry();
@@ -126,7 +121,7 @@ class CountryServiceImplTest {
     }
 
     @Test
-    void update() {
+    void updateCountriesByIdTest() {
 
         long countryId = 1L;
         CountryPostDto inputDto = new CountryPostDto();
@@ -150,7 +145,7 @@ class CountryServiceImplTest {
     }
 
     @Test
-    void getById() {
+    void getCountryByIdTest() {
 
         long countryId = 1L;
         Country expectedCountry = buildCountry();

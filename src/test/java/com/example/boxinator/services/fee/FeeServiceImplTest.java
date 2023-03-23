@@ -4,26 +4,14 @@ import com.example.boxinator.models.box.BoxTier;
 import com.example.boxinator.models.country.Country;
 import com.example.boxinator.models.country.CountryTier;
 import com.example.boxinator.models.fee.Fee;
-import com.example.boxinator.models.shipment.Shipment;
 import com.example.boxinator.repositories.box.BoxRepository;
 import com.example.boxinator.repositories.country.CountryRepository;
 import com.example.boxinator.repositories.fee.FeeRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.FluentQuery;
 
-import javax.swing.*;
-
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -49,7 +37,7 @@ class FeeServiceImplTest {
 
     // Testing for getting the base shipment fee
     @Test
-    void getBaseShipmentFee() {
+    void getBaseShipmentFeeTest() {
 
         Fee mockFee = Mockito.mock(Fee.class);
         Mockito.when(mockFee.getAmount()).thenReturn(200F);
@@ -66,7 +54,7 @@ class FeeServiceImplTest {
 
     // Testing calculating complete shipment cost
     @Test
-    void calculateShipmentCost() {
+    void calculateShipmentCostTest() {
         //  https://devwithus.com/java-spring-mock-repository/
         BoxTier boxTier = Mockito.mock(BoxTier.class);
         Mockito.when(boxTier.getWeight()).thenReturn(2F);

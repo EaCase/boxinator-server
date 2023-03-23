@@ -4,7 +4,6 @@ import com.example.boxinator.models.box.BoxTier;
 import com.example.boxinator.repositories.box.BoxRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 
@@ -36,7 +35,7 @@ class BoxServiceImplTest {
         return boxTier;
     }
     @Test
-    void getAllBoxTiers() {
+    void getAllBoxTiersTest() {
 
         BoxTier boxTier = Mockito.mock(BoxTier.class);
         Mockito.when(boxTier.getId()).thenReturn(3L);
@@ -54,7 +53,7 @@ class BoxServiceImplTest {
     }
 
     @Test
-    void getById() {
+    void getByBoxTierIdTest() {
 
         long boxTierId = 3L;
         BoxTier expectedBoxTier = buildBoxTier();

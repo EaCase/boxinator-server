@@ -1,6 +1,5 @@
 package com.example.boxinator.services.shipment;
 
-import com.example.boxinator.dtos.shipment.ShipmentGetDto;
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
 import com.example.boxinator.models.box.BoxTier;
@@ -19,18 +18,15 @@ import com.example.boxinator.services.country.CountryService;
 import com.example.boxinator.services.fee.FeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.matches;
@@ -74,7 +70,7 @@ class ShipmentServiceImplTest {
         );
     }
 
-     private Shipment buildShipment() {
+     private Shipment buildShipmentTest() {
         CountryTier countryTier = Mockito.mock(CountryTier.class);
         Mockito.when(countryTier.getId()).thenReturn(1L);
         Mockito.when(countryTier.getName()).thenReturn("Tier 1");
@@ -178,7 +174,7 @@ class ShipmentServiceImplTest {
         return shipmentStatus;
     }
     @Test
-    void testGetShipmentsFilteredByStatus() {
+    void testGetShipmentsFilteredByStatusTest() {
 
         Long accountId = 1L;
         //Local
@@ -222,10 +218,10 @@ class ShipmentServiceImplTest {
     }
 
     @Test
-    void getById() {
+    void getByShipmentIdTest() {
         Long accountId = 1L;
 
-        Shipment expectedShipment = buildShipment();
+        Shipment expectedShipment = buildShipmentTest();
 
         Mockito.when(shipmentRepository.findById(accountId)).thenReturn(Optional.of(expectedShipment));
 
@@ -236,9 +232,9 @@ class ShipmentServiceImplTest {
 
 
     @Test
-    void getAll() {
+    void getAllShipmentsTest() {
         List<Shipment> expectedShipments = new ArrayList<>();
-        expectedShipments.add(buildShipment());
+        expectedShipments.add(buildShipmentTest());
 
         Mockito.when(shipmentRepository.findAll()).thenReturn(expectedShipments);
 
@@ -248,10 +244,10 @@ class ShipmentServiceImplTest {
     }
 
     @Test
-    void deleteById() {
+    void deleteShipmentByIdTest() {
         long shipmentId = 1L;
 
-        Shipment expectedShipment = buildShipment();
+        Shipment expectedShipment = buildShipmentTest();
 
         Mockito.when(shipmentRepository.findById(shipmentId)).thenReturn(Optional.of(expectedShipment));
 
@@ -268,11 +264,11 @@ class ShipmentServiceImplTest {
         return shipmentStatus;
     }
     @Test
-    void updateShipmentStatus() {
+    void updateShipmentStatusTest() {
 
         Long shipmentId = 1L;
         Status status = Status.COMPLETED;
-        Shipment shipment = buildShipment();
+        Shipment shipment = buildShipmentTest();
         Mockito.when(shipmentRepository.findById(shipmentId)).thenReturn(Optional.of(shipment));
 
 
@@ -290,7 +286,7 @@ class ShipmentServiceImplTest {
     }
 
     @Test
-    void update() {
+    void updateWholeShipmentTest() {
 
         long shipmentId = 1L;
 
@@ -300,7 +296,7 @@ class ShipmentServiceImplTest {
         inputDto.setBoxTierId(1L);
         inputDto.setCountryId(1L);
 
-        Shipment expectedShipment = buildShipment();
+        Shipment expectedShipment = buildShipmentTest();
         Mockito.when(expectedShipment.getRecipient()).thenReturn("Updated Recipient");
         Mockito.when(expectedShipment.getBoxColor()).thenReturn("#FFFFF");
 
