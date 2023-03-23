@@ -32,6 +32,17 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
             "WHERE shipment.account_id = ?1  AND ts BETWEEN ?2 AND ?3 AND shipment_status.status IN ?4", nativeQuery = true)
     List<Shipment> findAllByAccountAndDateBetween(Long accountId, Date startDate, Date endDate, List<Integer> statuses);
 
+
+    @Query(value = "SELECT shipment.shipment_id, shipment.account_id, shipment.box_color, shipment.cost, shipment.recipient, shipment.box_tier_id, shipment.country_id, shipment_status.status  FROM shipment " +
+            "LEFT JOIN (SELECT shipment_id, MAX(ts) as max_ts " +
+            "FROM shipment_status "+
+            "GROUP BY shipment_id) " +
+            "latest_status ON  shipment.shipment_id = latest_status.shipment_id " +
+            "LEFT JOIN shipment_status ON shipment_status.shipment_id = latest_status.shipment_id AND shipment_status.ts = latest_status.max_ts " +
+            "LEFT JOIN country ON country.country_id = shipment.country_id " +
+            "WHERE shipment_status.status IN ?3 AND shipment_status.ts BETWEEN ?1 AND ?2", nativeQuery = true)
+    List<Shipment> findAllByDateBetween(Date startDate, Date endDate, List<Integer> statuses);
+
     @Query(value = "SELECT \n" +
             "shipment.shipment_id, shipment.account_id, shipment.box_color, shipment.cost, shipment.recipient, shipment.box_tier_id, shipment.country_id FROM shipment\n" +
             "LEFT JOIN shipment_status ON shipment_status.shipment_id = shipment.shipment_id\n" +
