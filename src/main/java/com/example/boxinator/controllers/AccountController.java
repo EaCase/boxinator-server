@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -24,6 +25,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "account")
 public class AccountController {
+    @Value("${spring.datasource.url}")
+    private String value1;
+    @Value("${auth.url.login}")
+    private String value2;
+
+
     private final AccountService accountService;
     private final AuthClient authClient;
     private final AccountMapper mapper;
@@ -32,6 +39,8 @@ public class AccountController {
         this.accountService = accService;
         this.authClient = authClient;
         this.mapper = mapper;
+        System.out.println("@@" + value1);
+        System.out.println("@@" + value2);
     }
 
     @GetMapping("/")
