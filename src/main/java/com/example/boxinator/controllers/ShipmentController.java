@@ -103,11 +103,10 @@ public class ShipmentController {
             statusEnum = List.of(Status.fromString(status));
         }
 
-        if(AuthUtils.isAdmin(auth)) {
+        if (AuthUtils.isAdmin(auth)) {
             var shipments = shipmentService.getShipmentsFiltered(null, startDate, endDate, statusEnum);
             var shipmentDTOs = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
             return ResponseEntity.ok().body(shipmentDTOs);
-
         }
         var shipments = shipmentService.getShipmentsFiltered(AuthUtils.getUserId(accountService, auth), startDate, endDate, statusEnum);
         var shipmentDTOs = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());

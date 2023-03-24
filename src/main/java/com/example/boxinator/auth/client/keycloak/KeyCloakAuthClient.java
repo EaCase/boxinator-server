@@ -93,30 +93,34 @@ public class KeyCloakAuthClient implements AuthClient {
             String userId = Objects.requireNonNull(res.getHeaders().get(HttpHeaders.LOCATION))
                     .get(0).replaceAll(".*/", "");
 
-            var roleResponse = new RestTemplate().exchange(
-                    URL_USERS + "/" + userId + "/role-mappings/clients/" + KEYCLOAK_CLIENT_ID,
-                    HttpMethod.POST,
-                    builder.buildRoleEditRequest(serviceAccountToken, type),
-                    JSONObject.class
-            );
+            // Try catch the other requests, if something goes wrong here, rollback the
+            // account creation by deleting the account from keycloak.
+            try {
+                var roleResponse = new RestTemplate().exchange(
+                        URL_USERS + "/" + userId + "/role-mappings/clients/" + KEYCLOAK_CLIENT_ID,
+                        HttpMethod.POST,
+                        builder.buildRoleEditRequest(serviceAccountToken, type),
+                        JSONObject.class
+                );
 
-            if (roleResponse.getStatusCode() != HttpStatus.NO_CONTENT) {
-                System.err.println("Failed to set user roles.");
-                throw new RuntimeException("Something went wrong.");
+                if (roleResponse.getStatusCode() != HttpStatus.NO_CONTENT) {
+                    System.err.println("Failed to set user roles.");
+                    throw new RuntimeException("Something went wrong.");
+                }
+                accountService.register(registrationInfo, userId);
+                return "Account successfully registered.";
+            } catch (Exception e) {
+                this.delete(userId);
+                throw new ApplicationException("Something went wrong during the registration process.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-
-            accountService.register(registrationInfo, userId);
-
-            return "Account successfully registered.";
         } catch (RestClientResponseException e) {
-            // TODO Delete registered data
             if (e.getStatusCode() == HttpStatus.CONFLICT) {
                 throw new ApplicationException("The provided email is already in use.", HttpStatus.CONFLICT);
             }
-            e.printStackTrace();
             throw new ApplicationException("Could not register the account with the provided information.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @Override
     public String delete(String accountId) {
