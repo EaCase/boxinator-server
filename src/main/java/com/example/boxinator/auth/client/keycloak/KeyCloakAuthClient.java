@@ -7,6 +7,7 @@ import com.example.boxinator.dtos.auth.Credentials;
 import com.example.boxinator.errors.exceptions.ApplicationException;
 import com.example.boxinator.models.account.AccountType;
 import com.example.boxinator.services.account.AccountService;
+import com.example.boxinator.utils.StringUtils;
 import com.nimbusds.jose.shaded.gson.Gson;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -74,6 +75,10 @@ public class KeyCloakAuthClient implements AuthClient {
 
     @Override
     public String register(AuthRegister registrationInfo, AccountType type) {
+        if (!StringUtils.isEmail(registrationInfo.getEmail())) {
+            throw new ApplicationException("Invalid email.", HttpStatus.BAD_REQUEST);
+        }
+
         AuthResponse serviceAccount = authAsServiceAccount();
         String serviceAccountToken = serviceAccount.getAccessToken();
 
