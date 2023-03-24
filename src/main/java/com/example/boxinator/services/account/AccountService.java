@@ -3,10 +3,15 @@ package com.example.boxinator.services.account;
 import com.example.boxinator.dtos.account.AccountPostDto;
 import com.example.boxinator.dtos.auth.AuthRegister;
 import com.example.boxinator.models.account.Account;
-import com.example.boxinator.services.shared.CrudService;
-import org.springframework.stereotype.Service;
 
-@Service
+/**
+ * Handles the accounts data in the servers' database. Is not capable of handling user credentials, and does not fully
+ * handle users on its own.
+ * <p>
+ * All registration methods here should be called from a service which can handle registration with credentials.
+ * The id which is given to the user in the other service, is handled as providerId here, and is used to map the two together
+ * (Properly authorized/handled account credentials - Other account data: dob etc.).
+ */
 public interface AccountService {
     /**
      * Register a temporary account with an email address, and send a link to the address which can be used to
@@ -15,10 +20,8 @@ public interface AccountService {
     Account registerTempAccount(String email);
 
     /**
-     * Register a new account. If registrationToken is provided with the info object, replaces the matching temp
+     * Register a new account. If registrationToken is provided with the AuthRegister object, replaces the matching temp
      * account in the database.
-     *
-     * @return Account
      */
     Account register(AuthRegister info, String providerId);
 
@@ -30,7 +33,6 @@ public interface AccountService {
 
     Account edit(AccountPostDto dto, String providerId);
 
-
     /**
      * Get the registration status of an account with its email address.
      *
@@ -39,9 +41,11 @@ public interface AccountService {
      */
     AccountStatus getAccountStatus(String email);
 
-
     void deleteByProviderId(String id);
 
+    /**
+     * Check whether an email address matches the one used when the provided registration token was created.
+     */
     boolean emailMatchesToken(String email, String registrationToken);
 
     /**

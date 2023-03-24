@@ -1,4 +1,4 @@
-package com.example.boxinator.auth;
+package com.example.boxinator.config;
 
 import com.example.boxinator.auth.jwt.JwtAuthConverter;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 
 
 @RequiredArgsConstructor

@@ -12,6 +12,11 @@ import com.example.boxinator.ratelimiter.RateLimiterService;
 import com.example.boxinator.utils.HttpUtils;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +35,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Log in a user.")
+    @ApiResponse(
+            responseCode = "200",
+            content = {@Content(mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = AuthResponse.class))
+            )}
+    )
     public ResponseEntity<AuthResponse> login(@RequestBody Credentials credentials, HttpServletRequest request) {
         Bucket bucket = rateLimiterService.resolveBucket(HttpUtils.getRequestIP(request));
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
@@ -44,6 +56,16 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Register a user with an email address and a password. In a case where a temporary account " +
+            "is being fully registered, the 'token' value should be passed in request params. In this case, the email address in request body " +
+            "must match the one where the token was sent to.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "String message of a successful registration.",
+            content = {@Content(mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = AuthResponse.class))
+            )}
+    )
     public ResponseEntity<String> register(@RequestBody AuthRegister registrationInfo, @RequestParam(required = false) String token) {
         registrationInfo.setRegistrationToken(token);
         var result = authClient.register(registrationInfo, AccountType.REGISTERED_USER);
@@ -51,6 +73,13 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(summary = "Refresh the session of a user by providing a refreshToken in the request body.")
+    @ApiResponse(
+            responseCode = "200",
+            content = {@Content(mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = AuthResponse.class))
+            )}
+    )
     public ResponseEntity<AuthResponse> refresh(@RequestBody AuthRefresh body) {
         var result = authClient.refresh(body.getRefreshToken());
         return ResponseEntity.ok().body(result);

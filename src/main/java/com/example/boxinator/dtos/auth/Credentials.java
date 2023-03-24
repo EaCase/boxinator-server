@@ -10,9 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Credentials {
-    /**
-     * Should be an email address.
-     */
     String username;
     String password;
 }
