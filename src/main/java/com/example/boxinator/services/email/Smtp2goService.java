@@ -4,6 +4,7 @@ import com.example.boxinator.errors.exceptions.ApplicationException;
 import com.example.boxinator.repositories.shipment.ShipmentRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -48,6 +49,7 @@ public class Smtp2goService implements EmailService {
     }
 
     @Override
+    @Async
     public void sendAccountRegistration(String email, String temporaryUserToken) {
         try {
             Message message = new MimeMessage(getSession());
@@ -61,8 +63,8 @@ public class Smtp2goService implements EmailService {
             mp.addBodyPart(text);
 
             message.setContent(mp);
-
             Transport.send(message);
+            System.out.println("Sent account registration link to address: " + email);
         } catch (javax.mail.MessagingException e) {
             System.err.println("Failed to send the registration email: " + e);
             e.printStackTrace();
@@ -70,6 +72,7 @@ public class Smtp2goService implements EmailService {
     }
 
     @Override
+    @Async
     public void sendOrderConfirmation(String email, Long shipmentId) {
 
         var shipment = shipmentRepository.findById(shipmentId).orElseThrow(() -> new ApplicationException("No shipment with that id", HttpStatus.BAD_REQUEST));
@@ -92,8 +95,9 @@ public class Smtp2goService implements EmailService {
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
             message.setSubject("Order confirmation");
             message.setContent(mp);
-            Transport.send(message);
 
+            Transport.send(message);
+            System.out.println("Sent order confirmation to address: " + email);
         } catch (javax.mail.MessagingException e) {
             System.err.println("Failed to send confirmation email: " + e);
             e.printStackTrace();

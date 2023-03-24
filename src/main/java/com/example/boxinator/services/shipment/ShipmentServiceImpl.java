@@ -60,7 +60,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     public List<Shipment> getShipmentsFiltered(Long accountId, Date from, Date to, List<Status> statuses) {
         var allStatuses = Arrays.stream(Status.values()).map(Enum::ordinal).toList();
 
-        if(accountId == null && from != null && to != null) {
+        if (accountId == null && from != null && to != null) {
             var shipmentStatuses = List.of(Status.INTRANSIT, Status.CREATED, Status.RECEIVED);
             // Ability to see all shipments that are not cancelled or complete !NB Admin only!
             return shipmentRepository.findAllByDateBetween(from, to, shipmentStatuses.stream().map(Enum::ordinal).toList());
@@ -115,7 +115,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         shipmentRepository.save(shipment);
         shipmentStatusRepository.save(status);
 
-        emailService.sendOrderConfirmation(accountService.getById(accountId).getEmail(),shipment.getId());
+        emailService.sendOrderConfirmation(accountService.getById(accountId).getEmail(), shipment.getId());
 
         return shipment;
     }

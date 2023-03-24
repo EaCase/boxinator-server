@@ -1,5 +1,8 @@
 package com.example.boxinator.services.email;
 
+/**
+ * Send email on different actions.
+ */
 public interface EmailService {
     /**
      * Sends an email with a link which can be used to fully register an account with the provided email.
