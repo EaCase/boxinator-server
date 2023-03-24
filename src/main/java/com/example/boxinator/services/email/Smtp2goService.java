@@ -15,17 +15,6 @@ import java.util.Properties;
 
 @Service
 public class Smtp2goService implements EmailService {
-
-    private ShipmentRepository shipmentRepository;
-
-
-     public Smtp2goService(
-             ShipmentRepository shipmentRepository
-     ) {
-         this.shipmentRepository = shipmentRepository;
-     }
-
-
     @Value("${mail.auth.username}")
     private String USERNAME;
 
@@ -50,8 +39,13 @@ public class Smtp2goService implements EmailService {
     @Value("${client.url.registration}")
     private String URL_FINISH_REG_BASE;
 
+    private final ShipmentRepository shipmentRepository;
 
-
+    public Smtp2goService(
+            ShipmentRepository shipmentRepository
+    ) {
+        this.shipmentRepository = shipmentRepository;
+    }
 
     @Override
     public void sendAccountRegistration(String email, String temporaryUserToken) {
@@ -70,29 +64,29 @@ public class Smtp2goService implements EmailService {
 
             Transport.send(message);
         } catch (javax.mail.MessagingException e) {
+            System.err.println("Failed to send the registration email: " + e);
             e.printStackTrace();
-            throw new RuntimeException("Failed to send mail.");
         }
     }
 
     @Override
     public void sendOrderConfirmation(String email, Long shipmentId) {
 
-       var shipment = shipmentRepository.findById(shipmentId).orElseThrow(() -> new ApplicationException("No shipment with that id", HttpStatus.BAD_REQUEST));
+        var shipment = shipmentRepository.findById(shipmentId).orElseThrow(() -> new ApplicationException("No shipment with that id", HttpStatus.BAD_REQUEST));
 
-       try{
+        try {
             Message message = new MimeMessage(getSession());
             Multipart mp = new MimeMultipart("alternative");
-           BodyPart htmlmessage = new MimeBodyPart();
-           htmlmessage.setContent(
-                   "<h1>Hello! Thank you for placing your shipment</h1>" + "<br>" +
-                           "<p><b>Order successfully placed! with order id: </b></p>" + shipmentId + "<br>" +
-                           "<p><b>Shipment placed for item: </b></p>" + shipment.getBoxTier().getName() + " mystery box" + "<br>" +
-                           "<p><b>Box colour: </b></p>" + shipment.getBoxColor() + "<br>" +
-                           "<p><b>Box weight: <b></p>" + shipment.getBoxTier().getWeight() + "kg" + "<br>" +
-                           "<p><b>Box being shipped to: </b><p>" + shipment.getCountry().getName() + "<br>" +
-                           "<p><b>Total cost of order: </b></p>" + shipment.getCost() + "&#8364;"
-                   , "text/html");
+            BodyPart htmlmessage = new MimeBodyPart();
+            htmlmessage.setContent(
+                    "<h1>Hello! Thank you for placing your shipment</h1>" + "<br>" +
+                            "<p><b>Order successfully placed! with order id: </b></p>" + shipmentId + "<br>" +
+                            "<p><b>Shipment placed for item: </b></p>" + shipment.getBoxTier().getName() + " mystery box" + "<br>" +
+                            "<p><b>Box colour: </b></p>" + shipment.getBoxColor() + "<br>" +
+                            "<p><b>Box weight: <b></p>" + shipment.getBoxTier().getWeight() + "kg" + "<br>" +
+                            "<p><b>Box being shipped to: </b><p>" + shipment.getCountry().getName() + "<br>" +
+                            "<p><b>Total cost of order: </b></p>" + shipment.getCost() + "&#8364;"
+                    , "text/html");
             mp.addBodyPart(htmlmessage);
             message.setFrom(new InternetAddress(MAIL_SENDER));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
@@ -101,8 +95,8 @@ public class Smtp2goService implements EmailService {
             Transport.send(message);
 
         } catch (javax.mail.MessagingException e) {
+            System.err.println("Failed to send confirmation email: " + e);
             e.printStackTrace();
-            throw new RuntimeException("Failed to send confirmation email");
         }
     }
 

@@ -15,8 +15,8 @@ public class AuthRegister {
     private Long countryId;
 
     @JsonIgnore
-    // In case the email is already used for temporary account, pass the server generated token with registration data to link the
-    // existing orders.
+    // In case the email is already used for a temporary account, pass the server generated token with registration data
+    // to link the existing temporary account to the full account.
     private String registrationToken;
 }
 

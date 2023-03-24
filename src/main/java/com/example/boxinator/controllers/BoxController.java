@@ -2,7 +2,6 @@ package com.example.boxinator.controllers;
 
 import com.example.boxinator.dtos.box.BoxTierGetDto;
 import com.example.boxinator.dtos.box.BoxTierMapper;
-import com.example.boxinator.models.account.AccountType;
 import com.example.boxinator.services.box.BoxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;

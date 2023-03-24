@@ -13,7 +13,19 @@ public interface AuthClient {
 
     AuthResponse refresh(String refreshToken);
 
+    /**
+     * Register an account.
+     *
+     * @param registrationInfo account info
+     * @param type             account type
+     * @return message of a successful registration to send to the client
+     */
     String register(AuthRegister registrationInfo, AccountType type);
 
-    String delete(String accountId);
+    /**
+     * Delete an account with its providerId.
+     *
+     * @param accountId the provider issued id for the account.
+     */
+    void delete(String accountId);
 }

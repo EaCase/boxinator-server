@@ -1,7 +1,6 @@
 package com.example.boxinator.auth.client.keycloak;
 
 
-import com.example.boxinator.dtos.account.AccountPostDto;
 import com.example.boxinator.dtos.auth.AuthRegister;
 import com.example.boxinator.dtos.auth.Credentials;
 import com.example.boxinator.models.account.AccountType;
@@ -15,8 +14,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.util.List;
 
+/**
+ * Builds HttpRequests for different Keycloak operations.
+ */
 @Component
 class KeyCloakRequestBuilder {
     @Value("${auth.secret}")

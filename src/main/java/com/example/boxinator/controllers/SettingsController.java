@@ -73,7 +73,7 @@ public class SettingsController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a country")
     @ApiResponse(responseCode = "200",
-            description = "Succesfully deleted a country",
+            description = "Id of the deleted country.",
             content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = Long.class))})
     @PreAuthorize("hasRole('ROLE_admin')")

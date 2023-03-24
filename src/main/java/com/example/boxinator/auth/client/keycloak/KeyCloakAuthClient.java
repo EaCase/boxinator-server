@@ -19,6 +19,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Base64;
 import java.util.Objects;
 
+/**
+ * Handles authentication and account creation via Keycloak.
+ */
 @Component
 public class KeyCloakAuthClient implements AuthClient {
     @Value("${auth.url.login}")
@@ -111,9 +114,11 @@ public class KeyCloakAuthClient implements AuthClient {
                 return "Account successfully registered.";
             } catch (Exception e) {
                 this.delete(userId);
+                e.printStackTrace();
                 throw new ApplicationException("Something went wrong during the registration process.", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (RestClientResponseException e) {
+            e.printStackTrace();
             if (e.getStatusCode() == HttpStatus.CONFLICT) {
                 throw new ApplicationException("The provided email is already in use.", HttpStatus.CONFLICT);
             }
@@ -123,7 +128,7 @@ public class KeyCloakAuthClient implements AuthClient {
 
 
     @Override
-    public String delete(String accountId) {
+    public void delete(String accountId) {
         AuthResponse serviceAccount = authAsServiceAccount();
         String serviceAccountToken = serviceAccount.getAccessToken();
         new RestTemplate().exchange(
@@ -133,7 +138,6 @@ public class KeyCloakAuthClient implements AuthClient {
                 JSONObject.class
         );
         accountService.deleteByProviderId(accountId);
-        return accountId;
     }
 
     private AuthResponse authAsServiceAccount() {
@@ -162,5 +166,4 @@ public class KeyCloakAuthClient implements AuthClient {
         }
         return response;
     }
-
 }
