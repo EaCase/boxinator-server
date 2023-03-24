@@ -64,8 +64,6 @@ public class ShipmentServiceImpl implements ShipmentService {
             var shipmentStatuses = List.of(Status.INTRANSIT, Status.CREATED, Status.RECEIVED);
             // Ability to see all shipments that are not cancelled or complete !NB Admin only!
             return shipmentRepository.findAllByDateBetween(from, to, shipmentStatuses.stream().map(Enum::ordinal).toList());
-                    //allStatuses.stream().filter(status ->
-                //status != Status.COMPLETED.ordinal() && status != Status.CANCELLED.ordinal()).toList());
         }
         else if (statuses != null && from != null && to != null) {
             // get shipments based on status date from and date to
