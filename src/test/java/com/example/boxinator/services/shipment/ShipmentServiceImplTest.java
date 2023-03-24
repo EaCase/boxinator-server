@@ -2,6 +2,7 @@ package com.example.boxinator.services.shipment;
 
 import com.example.boxinator.dtos.shipment.ShipmentMapper;
 import com.example.boxinator.dtos.shipment.ShipmentPostDto;
+import com.example.boxinator.models.account.Account;
 import com.example.boxinator.models.box.BoxTier;
 import com.example.boxinator.models.country.Country;
 import com.example.boxinator.models.country.CountryTier;
@@ -15,6 +16,7 @@ import com.example.boxinator.repositories.shipment.ShipmentStatusRepository;
 import com.example.boxinator.services.account.AccountService;
 import com.example.boxinator.services.box.BoxService;
 import com.example.boxinator.services.country.CountryService;
+import com.example.boxinator.services.email.EmailService;
 import com.example.boxinator.services.fee.FeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +47,8 @@ class ShipmentServiceImplTest {
     private AccountService accountService;
     private ShipmentMapper shipmentMapper;
 
+    private EmailService emailService;
+
     @BeforeEach
     void setUp() {
         shipmentRepository = Mockito.mock(ShipmentRepository.class);
@@ -55,6 +59,7 @@ class ShipmentServiceImplTest {
         feeService = Mockito.mock(FeeService.class);
         boxService = Mockito.mock(BoxService.class);
         accountService = Mockito.mock(AccountService.class);
+        emailService = Mockito.mock(EmailService.class);
 
 
         service = new ShipmentServiceImpl(
@@ -65,11 +70,14 @@ class ShipmentServiceImplTest {
                 countryService,
                 accountService,
                 boxService,
-
-
-                emailService);
+                emailService
+                );
     }
 
+    /**
+     *  Builds shipment to be used in other tests
+     *  Used for DRY purposes
+     **/
      private Shipment buildShipmentTest() {
         CountryTier countryTier = Mockito.mock(CountryTier.class);
         Mockito.when(countryTier.getId()).thenReturn(1L);
@@ -91,14 +99,9 @@ class ShipmentServiceImplTest {
         Mockito.when(fee.getName()).thenReturn("Base Shipment Cost");
         Mockito.when(fee.getId()).thenReturn(1L);
 
-        //   Status status = Mockito.mock(Status.class);
-        //    Mockito.when(status)
-
 
          ShipmentStatus shipmentStatus = Mockito.mock(ShipmentStatus.class);
          Mockito.when(shipmentStatus.getStatus()).thenReturn(Status.COMPLETED);
-
-
 
         Shipment shipment = Mockito.mock(Shipment.class);
         Mockito.when(shipment.getId()).thenReturn(1L);
@@ -115,6 +118,31 @@ class ShipmentServiceImplTest {
         return shipment;
     }
 
+    /**
+     * Used to build a single status
+     * Used for DRY purpose
+     **/
+    ShipmentStatus buildStatus(Status status) {
+        ShipmentStatus shipmentStatus = new ShipmentStatus();
+        shipmentStatus.setTs(new Timestamp(System.currentTimeMillis()));
+        shipmentStatus.setStatus(status);
+        return shipmentStatus;
+    }
+
+    /**
+     * Used to build a shipment status
+     * Used for DRY purpose
+     **/
+    private ShipmentStatus buildShipmentStatus(Status status, Shipment shipment) {
+        ShipmentStatus shipmentStatus = new ShipmentStatus();
+        shipmentStatus.setStatus(status);
+        shipmentStatus.setTs(new Date());
+        shipmentStatus.setShipment(shipment);
+        return shipmentStatus;
+    }
+    /**
+     * Test to create a single shipment
+     **/
     @Test
     void createShipmentTest() {
 
@@ -156,8 +184,12 @@ class ShipmentServiceImplTest {
         Mockito.when(feeService.calculateShipmentCost(1L,1L)).thenReturn(fee);
         Mockito.when(shipmentMapper.toShipment(any())).thenReturn(shipment);
 
-        Shipment createdShipment = service.createNewShipment(1L, shipmentPostDto);
+        Account account = Mockito.mock(Account.class);
+        Mockito.when(account.getId()).thenReturn(1L);
 
+        Mockito.when(accountService.getById(any())).thenReturn(account);
+
+        Shipment createdShipment = service.orderShipmentWithAccountId(1L, shipmentPostDto);
 
         assertNotNull(createdShipment);
         assertEquals(shipment.getRecipient(), createdShipment.getRecipient());
@@ -166,18 +198,13 @@ class ShipmentServiceImplTest {
 
     }
 
-    ShipmentStatus buildStatus1(Status status) {
-        ShipmentStatus shipmentStatus = new ShipmentStatus();
-        shipmentStatus.setTs(new Timestamp(System.currentTimeMillis()));
-     //   shipmentStatus.setShipment(shipment);
-        shipmentStatus.setStatus(status);
-        return shipmentStatus;
-    }
+    /**
+     * Test to get a shipment filtered by its status
+     **/
     @Test
     void testGetShipmentsFilteredByStatusTest() {
 
         Long accountId = 1L;
-        //Local
         String from = "2020-03-20";
         String to = "2023-03-22";
 
@@ -196,11 +223,11 @@ class ShipmentServiceImplTest {
 
         Shipment shipment1 = Mockito.mock(Shipment.class);
         Mockito.when(shipment1.getId()).thenReturn(1L);
-        Mockito.when(shipment1.getStatuses()).thenReturn(List.of(buildStatus1(Status.CREATED)));
+        Mockito.when(shipment1.getStatuses()).thenReturn(List.of(buildStatus(Status.CREATED)));
 
         Shipment shipment2 = Mockito.mock(Shipment.class);
         Mockito.when(shipment2.getId()).thenReturn(2L);
-        Mockito.when(shipment2.getStatuses()).thenReturn(List.of(buildStatus1(Status.COMPLETED)));
+        Mockito.when(shipment2.getStatuses()).thenReturn(List.of(buildStatus(Status.COMPLETED)));
 
         List<Shipment> expectedShipments = Arrays.asList(shipment1, shipment2);
 
@@ -217,6 +244,9 @@ class ShipmentServiceImplTest {
 
     }
 
+    /**
+     * Test to get a shipment by its id
+     **/
     @Test
     void getByShipmentIdTest() {
         Long accountId = 1L;
@@ -231,6 +261,9 @@ class ShipmentServiceImplTest {
     }
 
 
+    /**
+     * Test to get all shipments
+     **/
     @Test
     void getAllShipmentsTest() {
         List<Shipment> expectedShipments = new ArrayList<>();
@@ -243,6 +276,9 @@ class ShipmentServiceImplTest {
         assertEquals(expectedShipments, actualShipments);
     }
 
+    /**
+     * Test to delete a specific shipment by its id
+     **/
     @Test
     void deleteShipmentByIdTest() {
         long shipmentId = 1L;
@@ -256,13 +292,10 @@ class ShipmentServiceImplTest {
         Mockito.verify(shipmentRepository, Mockito.times(1)).deleteById(shipmentId);
     }
 
-    private ShipmentStatus buildStatus(Status status, Shipment shipment) {
-        ShipmentStatus shipmentStatus = new ShipmentStatus();
-        shipmentStatus.setStatus(status);
-        shipmentStatus.setTs(new Date());
-        shipmentStatus.setShipment(shipment);
-        return shipmentStatus;
-    }
+
+    /**
+     * Test to update a shipments status
+     **/
     @Test
     void updateShipmentStatusTest() {
 
@@ -279,12 +312,13 @@ class ShipmentServiceImplTest {
         assertEquals(result,shipment);
         Mockito.verify(shipmentRepository).findById(shipmentId);
 
-
-        ShipmentStatus expectedShipmentStatus = buildStatus(status, shipment);
         Mockito.verify(shipmentStatusRepository, Mockito.times(1)).save(any());
 
     }
 
+    /**
+     * Test to update the whole shipment
+     **/
     @Test
     void updateWholeShipmentTest() {
 
