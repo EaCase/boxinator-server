@@ -9,6 +9,49 @@ This repository contains a REST API for the Boxinator application. This project 
 There are three types of accounts. 'Admin' - All actions available, 'Basic' - Limited functionality, 'Guest' - Allowed
 to create shipments and upgrade the account to 'Basic' via a link provided in the email.
 
+
+### API Endpoints
+
+Our API consists of multiple different endpoints aimed at completeing different tasks.
+
+#### Shipment controller 
+![image](https://user-images.githubusercontent.com/89595592/227528566-209f9731-b29f-4f21-b1af-dbbe84dfe233.png)
+<br/>
+Our shipment controller handles various different methods of getting shipments. For example and admin user can get all shipments, but a basic user can only get shipments associated with their own account.
+<br/>
+
+An admin is allowed to delete shipments and change the states of the shipments. For example an admin may change a package from being <b>'CREATED'</b> to <b>'CANCELLED'</b>
+
+Additionally an unregistered user may order a shipment and after that will recieve an email asking them to sign-up to be able to see all their shipments made from there on forwards
+
+#### Country controller
+![image](https://user-images.githubusercontent.com/89595592/227530222-a65b94e9-803c-40cb-8ce7-c1bf4ce73fd5.png)
+
+Our country controller contains different endpoints to allow for the creation of countries, editing them and even deleting a country.
+
+Note! Only an admin users can delete a country. 
+
+#### Account controller 
+![image](https://user-images.githubusercontent.com/89595592/227535209-b71f83e3-4bfa-4fab-90ce-3aa2c92603e0.png)
+
+Our account controller has the ability to get an accounts details once a user has logged in. For example this functionality is used on the front end to show account details. A user is allowed to make changes to their own account details.
+
+In our current set up only an admin is allowed to delete accounts.
+
+#### Auth controller 
+![image](https://user-images.githubusercontent.com/89595592/227536400-f1784670-27bf-4763-9222-9acc5ef540de.png)
+
+Our auth controller handles all requests related to making an account and logging in. It also handles sending a refresh token to the user that is logged in.
+
+Authorization tokens are valid for 300 seconds and refresh tokens are valid for 1800 seconds.
+
+#### Box controller
+![image](https://user-images.githubusercontent.com/89595592/227537157-e31ea863-53c1-4241-85be-aa7038cdab1a.png)
+
+Our box controller handles all the different tiers of mysteryboxes a user can buy.
+
+Currently there are four different boxes available. Basic, humble, deluxe and premium. Each have their own weight respectively 
+
 ### Running locally
 
 1. Setup keycloak with the instructions from [this](https://github.com/EaCase/keycloak-docker-compose) repository.
@@ -56,46 +99,4 @@ spring.jpa.defer-datasource-initialization=true
 # Swagger
 springdoc.swagger-ui.operationsSorter=method
 ```
-
-### API Endpoints
-
-Our API consists of multiple different endpoints aimed at completeing different tasks.
-
-#### Shipment controller 
-![image](https://user-images.githubusercontent.com/89595592/227528566-209f9731-b29f-4f21-b1af-dbbe84dfe233.png)
-<br/>
-Our shipment controller handles various different methods of getting shipments. For example and admin user can get all shipments, but a basic user can only get shipments associated with their own account.
-<br/>
-
-An admin is allowed to delete shipments and change the states of the shipments. For example an admin may change a package from being <b>'CREATED'</b> to <b>'CANCELLED'</b>
-
-Additionally an unregistered user may order a shipment and after that will recieve an email asking them to sign-up to be able to see all their shipments made from there on forwards
-
-#### Country controller
-![image](https://user-images.githubusercontent.com/89595592/227530222-a65b94e9-803c-40cb-8ce7-c1bf4ce73fd5.png)
-
-Our country controller contains different endpoints to allow for the creation of countries, editing them and even deleting a country.
-
-Note! Only an admin users can delete a country. 
-
-#### Account controller 
-![image](https://user-images.githubusercontent.com/89595592/227535209-b71f83e3-4bfa-4fab-90ce-3aa2c92603e0.png)
-
-Our account controller has the ability to get an accounts details once a user has logged in. For example this functionality is used on the front end to show account details. A user is allowed to make changes to their own account details.
-
-In our current set up only an admin is allowed to delete accounts.
-
-#### Auth controller 
-![image](https://user-images.githubusercontent.com/89595592/227536400-f1784670-27bf-4763-9222-9acc5ef540de.png)
-
-Our auth controller handles all requests related to making an account and logging in. It also handles sending a refresh token to the user that is logged in.
-
-Authorization tokens are valid for 300 seconds and refresh tokens are valid for 1800 seconds.
-
-#### Box controller
-![image](https://user-images.githubusercontent.com/89595592/227537157-e31ea863-53c1-4241-85be-aa7038cdab1a.png)
-
-Our box controller handles all the different tiers of mysteryboxes a user can buy.
-
-Currently there are four different boxes available. Basic, humble, deluxe and premium. Each have their own weight respectively 
 
