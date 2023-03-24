@@ -36,6 +36,11 @@ public class AccountServiceImpl implements AccountService {
         if (info.getRegistrationToken() != null) {
             return completeTemporaryAccountRegistration(info, providerId);
         }
+        // If there was no registration token provided, check that the email is not currently
+        // expecting registration via a token, so no one can 'hijack' the email address.
+        // Email field is unique in sql, so it should not happen either way.
+        checkEmailCanBeUsedWithoutToken(info.getEmail());
+
         Account acc = populateAccountFields(new Account(), info);
         acc.setEmail(info.getEmail());
         acc.setProviderId(providerId);
@@ -50,6 +55,21 @@ public class AccountServiceImpl implements AccountService {
         var acc = populateAccountFields(temp, info);
         acc.setProviderId(providerId);
         return accountRepository.save(acc);
+    }
+
+    private void checkEmailCanBeUsedWithoutToken(String email) {
+        var account = accountRepository.findAccountByEmail(email);
+        if (account.isEmpty()) {
+            return;
+        }
+
+
+        if (account.get().getProviderId().contains(TEMP_ACCOUNT_PREFIX)) {
+            throw new ApplicationException(
+                    "You need to follow the link sent to you via email to complete the registration process for this email address.",
+                    HttpStatus.BAD_REQUEST);
+        }
+        throw new ApplicationException("The email address is already in use.", HttpStatus.CONFLICT);
     }
 
     // Sets all but email/ids/timestamp
@@ -149,7 +169,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public void deleteByProviderId(String id) {
-        System.out.println("Service delete " + id);
         accountRepository.deleteAccountByProviderId(id);
     }
 
