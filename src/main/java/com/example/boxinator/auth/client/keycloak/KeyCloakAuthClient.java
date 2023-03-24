@@ -13,6 +13,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -90,6 +91,8 @@ public class KeyCloakAuthClient implements AuthClient {
             }
         }
 
+        String userId = null;
+        boolean rollback = false;
         try {
             var res = new RestTemplate().exchange(
                     URL_USERS,
@@ -98,41 +101,42 @@ public class KeyCloakAuthClient implements AuthClient {
                     JSONObject.class
             );
 
-            String userId = Objects.requireNonNull(res.getHeaders().get(HttpHeaders.LOCATION))
+            userId = Objects.requireNonNull(res.getHeaders().get(HttpHeaders.LOCATION))
                     .get(0).replaceAll(".*/", "");
 
-            // Try catch the other requests, if something goes wrong here, rollback the
-            // account creation by deleting the account from keycloak.
-            try {
-                var roleResponse = new RestTemplate().exchange(
-                        URL_USERS + "/" + userId + "/role-mappings/clients/" + KEYCLOAK_CLIENT_ID,
-                        HttpMethod.POST,
-                        builder.buildRoleEditRequest(serviceAccountToken, type),
-                        JSONObject.class
-                );
+            var roleResponse = new RestTemplate().exchange(
+                    URL_USERS + "/" + userId + "/role-mappings/clients/" + KEYCLOAK_CLIENT_ID,
+                    HttpMethod.POST,
+                    builder.buildRoleEditRequest(serviceAccountToken, type),
+                    JSONObject.class
+            );
 
-                if (roleResponse.getStatusCode() != HttpStatus.NO_CONTENT) {
-                    System.err.println("Failed to set user roles.");
-                    throw new RuntimeException("Something went wrong.");
-                }
-                accountService.register(registrationInfo, userId);
-                return "Account successfully registered.";
-            } catch (Exception e) {
-                this.delete(userId);
-                e.printStackTrace();
-                throw new ApplicationException("Something went wrong during the registration process.", HttpStatus.INTERNAL_SERVER_ERROR);
+            if (roleResponse.getStatusCode() != HttpStatus.NO_CONTENT) {
+                System.err.println("Failed to set user roles.");
+                throw new RuntimeException("Something went wrong.");
             }
+            accountService.register(registrationInfo, userId);
+            return "Account successfully registered.";
         } catch (RestClientResponseException e) {
-            e.printStackTrace();
+            rollback = true;
             if (e.getStatusCode() == HttpStatus.CONFLICT) {
                 throw new ApplicationException("The provided email is already in use.", HttpStatus.CONFLICT);
             }
             throw new ApplicationException("Could not register the account with the provided information.", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            rollback = true;
+            throw e;
+        } finally {
+            System.out.println("Rollback account creation :" + rollback);
+            if (rollback && userId != null) {
+                this.delete(userId);
+            }
         }
     }
 
 
     @Override
+    @Async
     public void delete(String accountId) {
         AuthResponse serviceAccount = authAsServiceAccount();
         String serviceAccountToken = serviceAccount.getAccessToken();
