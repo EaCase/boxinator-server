@@ -35,7 +35,9 @@ class FeeServiceImplTest {
         );
     }
 
-    // Testing for getting the base shipment fee
+    /**
+     * Test for getting base shipping fee
+     **/
     @Test
     void getBaseShipmentFeeTest() {
 
@@ -51,11 +53,11 @@ class FeeServiceImplTest {
         System.out.println("Expected 200 " + "Base shipment fee: " + fee.getAmount());
 
     }
-
-    // Testing calculating complete shipment cost
+    /**
+     * Testing calculating complete shipment cost
+     **/
     @Test
     void calculateShipmentCostTest() {
-        //  https://devwithus.com/java-spring-mock-repository/
         BoxTier boxTier = Mockito.mock(BoxTier.class);
         Mockito.when(boxTier.getWeight()).thenReturn(2F);
         Mockito.when(boxTier.getName()).thenReturn("Humble");

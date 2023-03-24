@@ -39,7 +39,10 @@ class CountryServiceImplTest {
                 countryMapper
         );
     }
-
+    /**
+     * Used to create a shipment that is used in multiple tests
+     * Used for DRY purposes
+     **/
     private Country buildCountry(){
 
         CountryTier countryTier = Mockito.mock(CountryTier.class);
@@ -57,11 +60,14 @@ class CountryServiceImplTest {
 
         return country;
     }
+
+    /**
+     * Testing creating a country
+     **/
     @Test
     void createCountryTest() {
 
         CountryPostDto countryPostDto = new CountryPostDto();
-        //Mockito.when(countryPostDto.getName()).thenReturn("Test Country");
         countryPostDto.setName("Test Country");
 
 
@@ -87,6 +93,9 @@ class CountryServiceImplTest {
 
     }
 
+    /**
+     * Test to get all shipments
+     **/
     @Test
     void getAllCountriesTest() {
 
@@ -102,7 +111,9 @@ class CountryServiceImplTest {
 
 
     }
-
+    /**
+     * Test to deleted a country by it's id
+     **/
     @Test
     void deleteCountriesByIdTest() {
 
@@ -120,6 +131,9 @@ class CountryServiceImplTest {
 
     }
 
+    /**
+     * Test to update a country by its id
+     **/
     @Test
     void updateCountriesByIdTest() {
 
@@ -129,7 +143,6 @@ class CountryServiceImplTest {
 
         Country expectedCountry = buildCountry();
         Mockito.when(expectedCountry.getName()).thenReturn("Updated Country");
-        //expectedCountry.setName(inputDto.getName());
 
         Mockito.when(countryRepository.findById(countryId)).thenReturn(Optional.of(expectedCountry));
         Mockito.when(countryMapper.toCountry(inputDto)).thenReturn(expectedCountry);
@@ -140,10 +153,11 @@ class CountryServiceImplTest {
         assertEquals("Updated Country", expectedCountry.getName());
         Mockito.verify(countryRepository).save(expectedCountry);
 
-
-
     }
 
+    /**
+     * Test to get a specific country by its id
+     **/
     @Test
     void getCountryByIdTest() {
 
@@ -153,8 +167,6 @@ class CountryServiceImplTest {
         Mockito.when(countryRepository.findById(countryId)).thenReturn(Optional.of(expectedCountry));
 
         service.getById(countryId);
-
-
 
         Mockito.verify(countryRepository,  Mockito.times(1)).findById(countryId);
     }

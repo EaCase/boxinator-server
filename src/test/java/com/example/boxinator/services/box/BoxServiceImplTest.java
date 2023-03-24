@@ -26,6 +26,10 @@ class BoxServiceImplTest {
         );
     }
 
+    /**
+     * Used to create a mystery box. Used in multiple tests
+     * used for the purpose of DRY
+     **/
     BoxTier buildBoxTier() {
         BoxTier boxTier = Mockito.mock(BoxTier.class);
         Mockito.when(boxTier.getId()).thenReturn(3L);
@@ -34,6 +38,9 @@ class BoxServiceImplTest {
 
         return boxTier;
     }
+    /**
+     * Testing to get all box tiers
+     **/
     @Test
     void getAllBoxTiersTest() {
 
@@ -52,6 +59,9 @@ class BoxServiceImplTest {
         assertEquals(expectedBoxTiers,actualBoxTiers);
     }
 
+    /**
+     * Get a specific box by its id
+     **/
     @Test
     void getByBoxTierIdTest() {
 
