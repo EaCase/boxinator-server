@@ -57,14 +57,16 @@ respectively
 ## Running locally
 
 1. Setup keycloak with the instructions from [this](https://github.com/EaCase/keycloak-docker-compose) repository.
+   Keycloak auto-imports the 'Boxinator' realm which is configured to work out-of-the box for local development with
+   this API.
 2. Setup a [Postgres](https://www.postgresql.org/) instance on your local machine.
 3. Create an `application.properties` file into `src/main/resources/` folder, and copy the file below. Replace the
-   postgres, SMTP(can be omitted, email won't work in this case though) and client registration url properties. Client
+   postgres, SMTP(can be omitted, emails won't be sent in this case though) and client registration url properties.
+   Client
    registration url should point to a location in the client which can handle the registration via the registration
-   token.No need
-   to touch other config when using keycloak from step 1.
+   token. Rest of the config does not need to be edited if step 1. has been followed.
 4. Build & run
-5. Access endpoints: https://localhost/
+5. Access endpoints from: https://localhost/
 
 ```properties
 # Postgres
