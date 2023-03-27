@@ -1,70 +1,77 @@
 # Boxinator-server
 
-This repository contains a REST API for the Boxinator application. This project was made for the Noroff Accelerate case period task.
+This repository contains a REST API for the Boxinator application. This project was made for the Noroff Accelerate case
+period task.
 
-## Overview
+## API Endpoints
 
-#### Accounts
+Swagger documentation can be viewed locally
+from: [https://localhost/swagger-ui/index.html#/](https://localhost/swagger-ui/index.html#/)
 
-There are three types of accounts. 'Admin' - All actions available, 'Basic' - Limited functionality, 'Guest' - Allowed
-to create shipments and upgrade the account to 'Basic' via a link provided in the email.
+### /shipments
 
-
-### API Endpoints
-
-Our API consists of multiple different endpoints aimed at completeing different tasks.
-
-#### Shipment controller 
 ![image](https://user-images.githubusercontent.com/89595592/227528566-209f9731-b29f-4f21-b1af-dbbe84dfe233.png)
 <br/>
-Our shipment controller handles various different methods of getting shipments. For example and admin user can get all shipments, but a basic user can only get shipments associated with their own account.
+Handles various different methods of getting/modifying shipments. For example, an admin user can look at all
+ongoing shipments, and a basic user can get shipments associated with their own account.
 <br/>
 
-An admin is allowed to delete shipments and change the states of the shipments. For example an admin may change a package from being <b>'CREATED'</b> to <b>'CANCELLED'</b>
+An admin is allowed to delete shipments and change the states of the shipments. For example an admin may change a
+package from being <b>'CREATED'</b> to <b>'CANCELLED'</b>
 
-Additionally an unregistered user may order a shipment and after that will recieve an email asking them to sign-up to be able to see all their shipments made from there on forwards
+Additionally, unregistered users may order shipments by using their email address. The email address gets sent a link
+containing a temporary registration token which can be used to complete the registration process. Users can keep
+ordering with using only an email address until the email gets used for a 'fully' registered account.
 
-#### Country controller
+### /countries
+
 ![image](https://user-images.githubusercontent.com/89595592/227530222-a65b94e9-803c-40cb-8ce7-c1bf4ce73fd5.png)
 
-Our country controller contains different endpoints to allow for the creation of countries, editing them and even deleting a country.
+Basic CRUD-operations for the valid countries in the application.
 
-Note! Only an admin users can delete a country. 
+Note! Only an admin users can delete a country.
 
-#### Account controller 
+### /account
+
 ![image](https://user-images.githubusercontent.com/89595592/227535209-b71f83e3-4bfa-4fab-90ce-3aa2c92603e0.png)
 
-Our account controller has the ability to get an accounts details once a user has logged in. For example this functionality is used on the front end to show account details. A user is allowed to make changes to their own account details.
+Get/edit details related to an account. Admins are also allowed to delete accounts.
 
-In our current set up only an admin is allowed to delete accounts.
+### /auth
 
-#### Auth controller 
 ![image](https://user-images.githubusercontent.com/89595592/227536400-f1784670-27bf-4763-9222-9acc5ef540de.png)
 
-Our auth controller handles all requests related to making an account and logging in. It also handles sending a refresh token to the user that is logged in.
+Endpoints for logging in, creating new accounts, and refreshing sessions.
 
 Authorization tokens are valid for 300 seconds and refresh tokens are valid for 1800 seconds.
 
-#### Box controller
+### /boxes
+
 ![image](https://user-images.githubusercontent.com/89595592/227537157-e31ea863-53c1-4241-85be-aa7038cdab1a.png)
 
-Our box controller handles all the different tiers of mysteryboxes a user can buy.
+All the different tiers of mysteryboxes a user can buy.
 
-Currently there are four different boxes available. Basic, humble, deluxe and premium. Each have their own weight respectively 
+Currently there are four different boxes available. Basic, humble, deluxe and premium. Each have their own weight
+respectively
 
-### Running locally
+## Running locally
 
 1. Setup keycloak with the instructions from [this](https://github.com/EaCase/keycloak-docker-compose) repository.
-2. Setup Postgres instance.
+2. Setup a [Postgres](https://www.postgresql.org/) instance on your local machine.
 3. Create an `application.properties` file into `src/main/resources/` folder, and copy the file below. Replace the
-   postgres, SMTP and client registration url properties. No need to touch other config when using keycloak from step 1.
+   postgres, SMTP(can be omitted, email won't work in this case though) and client registration url properties. Client
+   registration url should point to a location in the client which can handle the registration via the registration
+   token.No need
+   to touch other config when using keycloak from step 1.
+4. Build & run
+5. Access endpoints: https://localhost/
 
 ```properties
 # Postgres
 spring.datasource.url={postgres_url}
 spring.datasource.username={postgres_username}
 spring.datasource.password={postgres_password}
-# SMTP - If using smtp2go, need to only replace the top 3
+# SMTP - for mail service - can be omitted
 mail.auth.username={username}
 mail.auth.password={password}
 mail.smtp.sender={sender_email}
@@ -74,7 +81,14 @@ mail.smtp.host=mail.smtp2go.com
 mail.smtp.port=2525
 # Client registration url for temporary accounts
 client.url.registration={url}
-# Auth client - Keycloak config - If following Step 1. all this will be correct
+# No need to edit properties below
+# Dev cert
+server.port=443
+server.ssl.key-store=keystore.p12
+server.ssl.key-store-password=tomcat
+server.ssl.keyStoreType=PKCS12
+server.ssl.keyAlias=tomcat
+# Auth client - Keycloak config
 auth.url.login=http://localhost:8083/realms/Boxinator/protocol/openid-connect/token
 auth.url.users=http://localhost:8083/admin/realms/Boxinator/users
 auth.client=boxinator-client
@@ -85,7 +99,7 @@ auth.client.id=db095150-691c-4def-be44-2fdb448d5e8f
 auth.role.admin.id=bcf5b412-471c-4eb8-90e0-9fcead8fd5d3
 # Keycloak user role id
 auth.role.user.id=01ab668a-ee5f-49bd-b5ac-0b0ef3cbc1a2
-# Jwt - If following Step 1. all this will be correct
+# Jwt
 spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8083/realms/Boxinator
 spring.security.oauth2.resourceserver.jwt.jwk-set-uri=${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
 jwt.auth.converter.resource-id=boxinator-client
@@ -100,12 +114,23 @@ spring.jpa.defer-datasource-initialization=true
 springdoc.swagger-ui.operationsSorter=method
 ```
 
-## Liscences
+## MIT
 
-MIT liscensing
+Begin license text.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Copyright 2023
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the “Software”), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+End license text.
