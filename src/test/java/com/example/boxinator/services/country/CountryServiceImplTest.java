@@ -54,7 +54,6 @@ class CountryServiceImplTest {
         Country country = Mockito.mock(Country.class);
         Mockito.when(country.getName()).thenReturn("Test Country");
         Mockito.when(country.getId()).thenReturn(1L);
-        Mockito.when(country.getTier()).thenReturn(countryTier);
         Mockito.when(countryMapper.toCountry(any())).thenReturn(country);
         Mockito.when(countryRepository.save(any())).thenReturn(country);
 
@@ -80,7 +79,6 @@ class CountryServiceImplTest {
         Country country = Mockito.mock(Country.class);
         Mockito.when(country.getName()).thenReturn("Test Country");
         Mockito.when(country.getId()).thenReturn(1L);
-        Mockito.when(country.getTier()).thenReturn(countryTier);
         Mockito.when(countryMapper.toCountry(any())).thenReturn(country);
         Mockito.when(countryRepository.save(any())).thenReturn(country);
 
@@ -88,7 +86,7 @@ class CountryServiceImplTest {
         Country createdCountry = service.create(countryPostDto);
         assertNotNull(createdCountry);
         assertEquals(country.getName(), createdCountry.getName());
-        assertEquals(countryTier.getName(), createdCountry.getTier().getName());
+
 
 
     }

@@ -92,7 +92,7 @@ class ShipmentServiceImplTest {
         Country country = Mockito.mock(Country.class);
         Mockito.when(country.getName()).thenReturn("Test Country");
         Mockito.when(country.getId()).thenReturn(1L);
-        Mockito.when(country.getTier()).thenReturn(countryTier);
+
 
         Fee fee = Mockito.mock(Fee.class);
         Mockito.when(fee.getAmount()).thenReturn(200F);
@@ -165,7 +165,6 @@ class ShipmentServiceImplTest {
         Country country = Mockito.mock(Country.class);
         Mockito.when(country.getName()).thenReturn("Test Country");
         Mockito.when(country.getId()).thenReturn(1L);
-        Mockito.when(country.getTier()).thenReturn(countryTier);
 
         Fee fee = Mockito.mock(Fee.class);
         Mockito.when(fee.getAmount()).thenReturn(200F);
