@@ -127,7 +127,7 @@ public class KeyCloakAuthClient implements AuthClient {
             rollback = true;
             throw e;
         } finally {
-            System.out.println("Rollback account creation :" + rollback);
+            System.out.println("Rollback account creation: " + rollback);
             if (rollback && userId != null) {
                 this.delete(userId);
             }

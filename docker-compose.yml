@@ -1,23 +1,27 @@
 version: "3.9"
 
 volumes:
-  postgres_data:
-    driver: local
+  data:
+    driver: azure_file
+    driver_opts:
+      share_name: apivolume
+      storage_account_name: 123boxinator123
 
 services:
   db:
     image: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_PASSWORD: strongpassword
       POSTGRES_DB: boxinator
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - data:/var/lib/postgresql/data
 
   api:
     build: .
+    image: boxinatorserver.azurecr.io/api/boxinator
     ports:
       - "8080:8080"
     depends_on:
@@ -26,26 +30,25 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/boxinator
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_DATASOURCE_PASSWORD: strongpassword
       AUTH_URL_LOGIN: http://keycloak:8080/realms/Boxinator/protocol/openid-connect/token
       AUTH_URL_REGISTER: http://keycloak:8080/admin/realms/Boxinator/users
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER-URI: http://keycloak:8080/realms/Boxinator
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/Boxinator
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0
-    volumes:
-      - ./data/import:/opt/keycloak/data/import
+    build: keycloak/
+    image: boxinatorserver.azurecr.io/api/keycloak
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
       DB_DATABASE: keycloak
       DB_USER: postgres
       DB_SCHEMA: public
-      DB_PASSWORD: 1234
+      DB_PASSWORD: strongpassword
       KEYCLOAK_USER: admin
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     depends_on:
       - db
     command:
-      - start-dev --import-realm -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
+      - start-dev --import-realm
