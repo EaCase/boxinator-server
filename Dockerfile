@@ -7,6 +7,7 @@ WORKDIR /app
 # Copy the Gradle build files and the source code to the container
 COPY build.gradle settings.gradle ./
 COPY src ./src
+COPY keystore.p12 ./
 
 # Download and install Gradle
 ENV GRADLE_VERSION 7.6.1

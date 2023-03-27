@@ -64,13 +64,13 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     public List<Shipment> getShipmentsFiltered(Long accountId, Date from, Date to, List<Status> statuses) {
-        if (accountId == null) return getShipmentsForAdminUser(from,to);
-        return getShipmentsForBasicUser(accountId,from,to,statuses);
+        if (accountId == null) return getShipmentsForAdminUser(from, to);
+        return getShipmentsForBasicUser(accountId, from, to, statuses);
     }
 
     private List<Shipment> getShipmentsForAdminUser(Date from, Date to) {
         var shipmentStatuses = List.of(Status.INTRANSIT, Status.CREATED, Status.RECEIVED).stream().map(Enum::ordinal).toList();
-        if(from == null && to == null) {
+        if (from == null && to == null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate fromLocal = LocalDate.parse("2000-01-01", formatter);
             LocalDate toLocal = LocalDate.parse("2200-01-01", formatter);
