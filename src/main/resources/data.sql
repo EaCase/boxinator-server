@@ -23,7 +23,7 @@ INSERT INTO shipment(account_id, box_tier_id, box_color, country_id, cost, recip
 VALUES (1, 1, '#FFFFFF', 1, 100, 'User name');
 
 INSERT INTO shipment_status(shipment_id, status, ts)
-VALUES (1, 1, null);
+VALUES (1, 1, '2023-01-01');
 
 INSERT INTO fee(name, amount)
 VALUES ('Base shipping fee', 200);

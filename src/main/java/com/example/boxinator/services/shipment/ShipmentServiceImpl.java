@@ -18,9 +18,15 @@ import com.example.boxinator.services.fee.FeeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class ShipmentServiceImpl implements ShipmentService {
@@ -58,23 +64,33 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     public List<Shipment> getShipmentsFiltered(Long accountId, Date from, Date to, List<Status> statuses) {
-        var allStatuses = Arrays.stream(Status.values()).map(Enum::ordinal).toList();
+        if (accountId == null) return getShipmentsForAdminUser(from,to);
+        return getShipmentsForBasicUser(accountId,from,to,statuses);
+    }
 
-        if (accountId == null && from != null && to != null) {
-            var shipmentStatuses = List.of(Status.INTRANSIT, Status.CREATED, Status.RECEIVED);
-            // Ability to see all shipments that are not cancelled or complete !NB Admin only!
-            return shipmentRepository.findAllByDateBetween(from, to, shipmentStatuses.stream().map(Enum::ordinal).toList());
+    private List<Shipment> getShipmentsForAdminUser(Date from, Date to) {
+        var shipmentStatuses = List.of(Status.INTRANSIT, Status.CREATED, Status.RECEIVED).stream().map(Enum::ordinal).toList();
+        if(from == null && to == null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate fromLocal = LocalDate.parse("2000-01-01", formatter);
+            LocalDate toLocal = LocalDate.parse("2200-01-01", formatter);
+
+            from = Date.from(fromLocal.atStartOfDay(ZoneOffset.UTC).toInstant());
+            to = Date.from(toLocal.atStartOfDay(ZoneOffset.UTC).toInstant());
+
         }
-        else if (statuses != null && from != null && to != null) {
-            // get shipments based on status date from and date to
+
+        return shipmentRepository.findAllByDateBetween(from, to, shipmentStatuses);
+    }
+
+    private List<Shipment> getShipmentsForBasicUser(Long accountId, Date from, Date to, List<Status> statuses) {
+        var allStatuses = Arrays.stream(Status.values()).map(Enum::ordinal).toList();
+        if (statuses != null && from != null && to != null)
             return shipmentRepository.findAllByAccountAndDateBetween(accountId, from, to, statuses.stream().map(Enum::ordinal).toList());
-        } else if (from != null && to != null) {
-            // get shipments based on date range only;
+        if (from != null && to != null)
             return shipmentRepository.findAllByAccountAndDateBetween(accountId, from, to, allStatuses);
-        } else {
-            // get all shipments
-            return shipmentRepository.findAllByAccountId(accountId);
-        }
+
+        return shipmentRepository.findAllByAccountId(accountId);
     }
 
     @Override
