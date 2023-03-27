@@ -78,7 +78,8 @@ application separately from the keycloak and postgres instances.
    this API.
 2. Setup a [Postgres](https://www.postgresql.org/) instance on your local machine.
 3. Create an `application.properties` file into `src/main/resources/` folder, and copy the file below. Replace the
-   postgres, SMTP(can be omitted, emails won't be sent in this case though) and client registration url properties.
+   postgres, SMTP(can be omitted, emails won't be sent in this case though) and client registration url(Can be also
+   omitted) properties.
    Client registration url should point to a location in the client which can handle the registration via the
    registration token. Rest of the config does not need to be edited if step 1. has been followed.
 4. Build & run
