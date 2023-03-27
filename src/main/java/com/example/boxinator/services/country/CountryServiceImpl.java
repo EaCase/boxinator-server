@@ -38,20 +38,10 @@ public class CountryServiceImpl implements CountryService {
             );
         }
 
-        setCountryTier(country);
         countryRepository.save(country);
         return country;
     }
 
-    /**
-     * 'Calculate' a tier for a country and set the tier object to the parameter country instance.
-     * @param country to 'calculate' the tier for
-     */
-    private void setCountryTier(Country country) {
-        List<CountryTier> tiers = countryTierRepository.getNonSourceTiers();
-        CountryTier tier = tiers.get((int)(Math.random() * tiers.size()));
-        country.setTier(tier);
-    }
 
     @Override
     public List<Country> getAll() {
@@ -72,7 +62,7 @@ public class CountryServiceImpl implements CountryService {
                 HttpStatus.NOT_FOUND
         ));
 
-        country.setTier(country.getTier());
+        country.setShippingMultiplier(dto.getShippingMultiplier());
         country.setName(dto.getName());
         countryRepository.save(country);
         return country;

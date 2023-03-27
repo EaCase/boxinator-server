@@ -43,7 +43,7 @@ public class FeeServiceImpl implements FeeService {
         ));
 
         Fee fee = new Fee();
-        fee.setAmount(getBaseShipmentFee().getAmount() + boxTier.getWeight() * country.getTier().getShippingMultiplier());
+        fee.setAmount(getBaseShipmentFee().getAmount() + boxTier.getWeight() * country.getShippingMultiplier());
         fee.setName("Shipment cost for " + boxTier.getName() + " to " + country.getName());
         return fee;
     }

@@ -1,13 +1,9 @@
-INSERT INTO country_tier(name, shipping_multiplier)
-VALUES ('Source', 0),
-       ('Tier 1', 5),
-       ('Tier 2', 10),
-       ('Tier 3', 15);
 
-INSERT INTO country(name, country_tier_id)
-VALUES ('Denmark', 1),
-       ('Norway', 1),
-       ('Sweden', 1),
+
+INSERT INTO country(name, shipping_multiplier)
+VALUES ('Denmark', 0),
+       ('Norway', 0),
+       ('Sweden', 0),
        ('Germany', 2);
 
 INSERT INTO box_tier(name, weight)

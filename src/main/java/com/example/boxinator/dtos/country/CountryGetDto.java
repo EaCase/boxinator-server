@@ -6,4 +6,6 @@ import lombok.Data;
 public class CountryGetDto {
     private Long id;
     private String name;
+
+    private Float shippingMultiplier;
 }
