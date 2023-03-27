@@ -1,11 +1,8 @@
-version: "3.9"
+version: "3.3"
 
 volumes:
   data:
-    driver: azure_file
-    driver_opts:
-      share_name: apivolume
-      storage_account_name: 123boxinator123
+    driver: local
 
 services:
   db:
@@ -21,9 +18,8 @@ services:
 
   api:
     build: .
-    image: boxinatorserver.azurecr.io/api/boxinator
     ports:
-      - "8080:8080"
+      - "80:8080"
     depends_on:
       - db
       - keycloak
@@ -37,7 +33,6 @@ services:
 
   keycloak:
     build: keycloak/
-    image: boxinatorserver.azurecr.io/api/keycloak
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
@@ -51,4 +46,4 @@ services:
     depends_on:
       - db
     command:
-      - start-dev --import-realm
+      - start-dev --import-realm -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
