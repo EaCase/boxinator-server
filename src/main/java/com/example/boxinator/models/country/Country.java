@@ -17,7 +17,8 @@ public class Country {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "country_tier_id")
-    private CountryTier tier;
+    @Column(nullable = false)
+    private Float shippingMultiplier;
+
+
 }

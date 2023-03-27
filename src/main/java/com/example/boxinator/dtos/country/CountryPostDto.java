@@ -5,4 +5,6 @@ import lombok.Data;
 @Data
 public class CountryPostDto {
     private String name;
+
+    private Float shippingMultiplier;
 }
