@@ -1,9 +1,13 @@
 # Boxinator-server
 
 This repository contains a REST API for the Boxinator application. This project was made for the Noroff Accelerate case
-period task.
+period task. [Keycloak](https://www.keycloak.org/) is used for handling user credentials, and all other data is handled
+by Postgres.
 
 ## API Endpoints
+
+Most of the endpoints require a valid Authorization Bearer token to be included in the request headers. Refer to the
+Swagger documentation for more in-depth usages for each of the endpoints.
 
 Swagger documentation can be viewed locally
 from: [https://localhost/swagger-ui/index.html#/](https://localhost/swagger-ui/index.html#/)
@@ -56,15 +60,27 @@ respectively
 
 ## Running locally
 
+### Only required to have an instance running:
+
+The repository contains a docker-compose.yml which can be used to run the entire thing just by
+running `docker-compose up` command. You only need to follow the step 3. from the Development section below to create
+the required config file.
+
+This will create and run the three containers: Postgres, Keycloak with the correct 'Boxinator' realm and the server.
+
+When developing, the below step-by-step instructions should be followed to easily allow rebuilding/restarting the server
+application separately from the keycloak and postgres instances.
+
+### Development:
+
 1. Setup keycloak with the instructions from [this](https://github.com/EaCase/keycloak-docker-compose) repository.
    Keycloak auto-imports the 'Boxinator' realm which is configured to work out-of-the box for local development with
    this API.
 2. Setup a [Postgres](https://www.postgresql.org/) instance on your local machine.
 3. Create an `application.properties` file into `src/main/resources/` folder, and copy the file below. Replace the
    postgres, SMTP(can be omitted, emails won't be sent in this case though) and client registration url properties.
-   Client
-   registration url should point to a location in the client which can handle the registration via the registration
-   token. Rest of the config does not need to be edited if step 1. has been followed.
+   Client registration url should point to a location in the client which can handle the registration via the
+   registration token. Rest of the config does not need to be edited if step 1. has been followed.
 4. Build & run
 5. Access endpoints from: https://localhost/
 
