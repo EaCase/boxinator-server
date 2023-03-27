@@ -9,6 +9,7 @@ import com.example.boxinator.repositories.country.CountryRepository;
 import com.example.boxinator.repositories.fee.FeeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.Optional;
@@ -66,8 +67,8 @@ class FeeServiceImplTest {
         Mockito.when(tier.getShippingMultiplier()).thenReturn(200F);
 
         Country country = Mockito.mock(Country.class);
-        Mockito.when(country.getTier()).thenReturn(tier);
         Mockito.when(country.getName()).thenReturn("Denmark");
+        Mockito.when(country.getShippingMultiplier()).thenReturn(0F);
 
         Fee mockFee = Mockito.mock(Fee.class);
         Mockito.when(mockFee.getAmount()).thenReturn(200F);
@@ -77,7 +78,7 @@ class FeeServiceImplTest {
         Mockito.when(boxRepository.findById(anyLong())).thenReturn(Optional.of(boxTier));
 
         Fee fee = service.calculateShipmentCost(0L,0L);
-        assertEquals(600F, fee.getAmount());
+        assertEquals(200F, fee.getAmount());
         assertEquals("Shipment cost for Humble to Denmark", fee.getName());
     }
 }
