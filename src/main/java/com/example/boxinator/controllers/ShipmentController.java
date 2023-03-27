@@ -104,10 +104,12 @@ public class ShipmentController {
         }
 
         if (AuthUtils.isAdmin(auth)) {
+            var unfilteredShipments = shipmentService.getAll();
             var shipments = shipmentService.getShipmentsFiltered(null, startDate, endDate, statusEnum);
-            var shipmentDTOs = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
+            var shipmentDTOs = unfilteredShipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
             return ResponseEntity.ok().body(shipmentDTOs);
         }
+        var unfilteredShipments = shipmentService.getAll();
         var shipments = shipmentService.getShipmentsFiltered(AuthUtils.getUserId(accountService, auth), startDate, endDate, statusEnum);
         var shipmentDTOs = shipments.stream().map(shipmentMapper::toShipmentDto).collect(Collectors.toList());
         return ResponseEntity.ok().body(shipmentDTOs);

@@ -71,6 +71,8 @@ public class CountryServiceImpl implements CountryService {
                 "A country with the id: " + id +  " Could not be found.",
                 HttpStatus.NOT_FOUND
         ));
+
+        country.setTier(country.getTier());
         country.setName(dto.getName());
         countryRepository.save(country);
         return country;
