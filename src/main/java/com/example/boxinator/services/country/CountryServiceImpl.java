@@ -7,6 +7,7 @@ import com.example.boxinator.models.country.Country;
 import com.example.boxinator.models.country.CountryTier;
 import com.example.boxinator.repositories.country.CountryRepository;
 import com.example.boxinator.repositories.country.CountryTierRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +46,9 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public List<Country> getAll() {
-        return countryRepository.findAll();
+
+        Sort sortById = Sort.by("id");
+        return countryRepository.findAll(sortById);
     }
 
     @Override
@@ -65,6 +68,7 @@ public class CountryServiceImpl implements CountryService {
         country.setShippingMultiplier(dto.getShippingMultiplier());
         country.setName(dto.getName());
         countryRepository.save(country);
+
         return country;
     }
 
