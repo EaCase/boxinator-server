@@ -71,7 +71,7 @@ public class SettingsController {
     }
 
     @PutMapping("/countries/{id}")
-    @Operation(summary = "Edit the name of a country.")
+    @Operation(summary = "Edit a country.")
     @ApiResponse(
             responseCode = "204",
             description = "Returns the country with the new name.",
@@ -79,6 +79,7 @@ public class SettingsController {
                     schema = @Schema(implementation = CountryGetDto.class)
             )}
     )
+    @PreAuthorize("hasRole('ROLE_admin')")
     public ResponseEntity<CountryGetDto> updateCountry(@PathVariable Long id, @RequestBody CountryPostDto body) {
         var editedCountry = countryMapper.toGetDto(countryService.update(id, body));
         return ResponseEntity.ok().body(editedCountry);
