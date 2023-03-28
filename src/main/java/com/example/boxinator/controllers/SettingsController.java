@@ -42,6 +42,20 @@ public class SettingsController {
         return ResponseEntity.ok().body(countries);
     }
 
+    @GetMapping("/countries/{id}")
+    @Operation(summary = "Get a country by id.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Returns the country object.",
+            content = {@Content(mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = CountryGetDto.class))
+            )}
+    )
+    public ResponseEntity<CountryGetDto> getCountryById(@PathVariable Long id) {
+        var country = countryMapper.toGetDto(countryService.getById(id));
+        return ResponseEntity.ok().body(country);
+    }
+
     @PostMapping("/countries")
     @Operation(summary = "Add a new country by providing its name.")
     @ApiResponse(

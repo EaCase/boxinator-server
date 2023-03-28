@@ -47,6 +47,22 @@ public class AccountController {
         return buildResponse(auth, account);
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get account details for user by id (Admin only).")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Returns account information.",
+            content = {@Content(mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = AccountGetDto.class))
+            )}
+    )
+    @PreAuthorize("hasRole('ROLE_admin')")
+    public ResponseEntity<AccountGetDto> getAccountDetails(Authentication auth, @PathVariable Long id) {
+        Account account = accountService.getById(id);
+        return buildResponse(auth, account);
+    }
+
+
     @PutMapping("/")
     @Operation(summary = "Edit account details.")
     @ApiResponse(

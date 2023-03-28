@@ -16,16 +16,13 @@ import java.util.List;
 @Service
 public class CountryServiceImpl implements CountryService {
     private final CountryRepository countryRepository;
-    private final CountryTierRepository countryTierRepository;
     private final CountryMapper countryMapper;
 
     public CountryServiceImpl(
             CountryRepository countryRepository,
-            CountryTierRepository countryTierRepository,
             CountryMapper countryMapper
     ) {
         this.countryRepository = countryRepository;
-        this.countryTierRepository = countryTierRepository;
         this.countryMapper = countryMapper;
     }
 
@@ -53,7 +50,6 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public void deleteById(Long id) {
-
         countryRepository.findById(id).orElseThrow(() -> new ApplicationException("Country wit this id does not exist", HttpStatus.NOT_FOUND));
         countryRepository.deleteById(id);
     }
@@ -61,7 +57,7 @@ public class CountryServiceImpl implements CountryService {
     @Override
     public Country update(Long id, CountryPostDto dto) {
         Country country = countryRepository.findById(id).orElseThrow(() -> new ApplicationException(
-                "A country with the id: " + id +  " Could not be found.",
+                "A country with the id: " + id + " Could not be found.",
                 HttpStatus.NOT_FOUND
         ));
 
@@ -74,10 +70,8 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public Country getById(Long id) {
-
         return countryRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException("No country found with that id", HttpStatus.NOT_FOUND));
-
     }
 
 
