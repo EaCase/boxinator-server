@@ -29,6 +29,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: strongpassword
       AUTH_URL_LOGIN: http://keycloak:8080/realms/Boxinator/protocol/openid-connect/token
       AUTH_URL_REGISTER: http://keycloak:8080/admin/realms/Boxinator/users
+      AUTH_URL_USERS: http://keycloak:8080/admin/realms/Boxinator/users
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/Boxinator
 
   keycloak:

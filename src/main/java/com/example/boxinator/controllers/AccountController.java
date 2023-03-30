@@ -4,6 +4,7 @@ import com.example.boxinator.auth.client.AuthClient;
 import com.example.boxinator.dtos.account.AccountGetDto;
 import com.example.boxinator.dtos.account.AccountMapper;
 import com.example.boxinator.dtos.account.AccountPostDto;
+import com.example.boxinator.errors.exceptions.ApplicationException;
 import com.example.boxinator.models.account.Account;
 import com.example.boxinator.models.account.AccountType;
 import com.example.boxinator.services.account.AccountService;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -48,7 +50,7 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get account details for user by id (Admin only).")
+    @Operation(summary = "Get account details for user by id.")
     @ApiResponse(
             responseCode = "200",
             description = "Returns account information.",
@@ -56,10 +58,18 @@ public class AccountController {
                     array = @ArraySchema(schema = @Schema(implementation = AccountGetDto.class))
             )}
     )
-    @PreAuthorize("hasRole('ROLE_admin')")
     public ResponseEntity<AccountGetDto> getAccountDetails(Authentication auth, @PathVariable Long id) {
-        Account account = accountService.getById(id);
-        return buildResponse(auth, account);
+        if (AuthUtils.isAdmin(auth)) {
+            Account account = accountService.getById(id);
+            return buildResponse(auth, account);
+        }
+
+        if (!AuthUtils.getUserId(accountService, auth).equals(id)) throw new ApplicationException(
+                "Not authorized",
+                HttpStatus.UNAUTHORIZED
+        );
+
+        return buildResponse(auth, accountService.getById(id));
     }
 
 

@@ -59,6 +59,7 @@ public class KeyCloakAuthClient implements AuthClient {
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 throw new ApplicationException("Invalid user credentials.", HttpStatus.UNAUTHORIZED);
             }
+            e.printStackTrace();
             throw new ApplicationException("Could not log in.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
