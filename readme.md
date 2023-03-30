@@ -127,6 +127,10 @@ spring.jpa.defer-datasource-initialization=true
 springdoc.swagger-ui.operationsSorter=method
 ```
 
+## Contributors
+
+Max Bowen, Leevi Limnell
+
 ## MIT
 
 Begin license text.
