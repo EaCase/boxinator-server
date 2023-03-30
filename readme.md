@@ -10,7 +10,7 @@ Most of the endpoints require a valid Authorization Bearer token to be included 
 Swagger documentation for more in-depth usages for each of the endpoints.
 
 Swagger documentation can be viewed locally
-from: [https://localhost/swagger-ui/index.html#/](https://localhost/swagger-ui/index.html#/)
+from: [http://localhost:8080/swagger-ui/index.html#/](http://localhost:8080/swagger-ui/index.html#/)
 
 ### /shipments
 
@@ -83,7 +83,7 @@ application separately from the keycloak and postgres instances.
    Client registration url should point to a location in the client which can handle the registration via the
    registration token. Rest of the config does not need to be edited if step 1. has been followed.
 4. Build & run
-5. Access endpoints from: https://localhost/
+5. Access endpoints from: http://localhost:8080/
 
 ```properties
 # Postgres
