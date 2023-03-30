@@ -101,12 +101,6 @@ mail.smtp.port=2525
 # Client registration url for temporary accounts
 client.url.registration={url}
 # No need to edit properties below
-# Dev cert
-server.port=443
-server.ssl.key-store=keystore.p12
-server.ssl.key-store-password=tomcat
-server.ssl.keyStoreType=PKCS12
-server.ssl.keyAlias=tomcat
 # Auth client - Keycloak config
 auth.url.login=http://localhost:8083/realms/Boxinator/protocol/openid-connect/token
 auth.url.users=http://localhost:8083/admin/realms/Boxinator/users
